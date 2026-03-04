@@ -7,18 +7,37 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+<!-- ============================================================
+  SUPABASE SETUP INSTRUCTIONS
+  ============================================================
+  1. Go to https://supabase.com and create a free account
+  2. Create a new project
+  3. Go to Project Settings > API
+  4. Copy your Project URL and anon/public key
+  5. Replace the two values below:
+  ============================================================ -->
 <script>
-  const SUPABASE_URL = 'https://sllpwaeiiirzkbduyedz.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsbHB3YWVpaWlyemtiZHV5ZWR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjEwNzIsImV4cCI6MjA4ODE5NzA3Mn0.Ro-lmBU1RdrF0j0LYtDLNc89Eagu56whcXI7hWPo5uI';
-  const ADMIN_PASSWORD = 'Fhumuandsiya1!';
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL';       // e.g. https://abcxyz.supabase.co
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // starts with eyJ...
+  const ADMIN_PASSWORD = 'change_this_password';   // Change this to your own password!
 </script>
 
 <script>
-// Load Supabase safely — app works even if CDN fails
+// Load Supabase — init only fires AFTER library is fully ready
 (function() {
   var s = document.createElement('script');
   s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  s.onerror = function() { console.warn('Supabase CDN failed — running in demo mode.'); };
+  s.onload = function() {
+    window._supabaseReady = true;
+    // Only call initSupabase if the main app script has already run
+    if (window._appReady) initSupabase();
+  };
+  s.onerror = function() {
+    console.warn('Supabase CDN failed — running in demo mode.');
+    window._supabaseReady = false;
+    var el = document.getElementById('setup-conn-warn');
+    if (el) el.classList.add('show');
+  };
   document.head.appendChild(s);
 })();
 </script>
@@ -397,18 +416,22 @@ let dbMode = false; // true = Supabase connected, false = demo mode
 function initSupabase() {
   try {
     if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-      console.warn('SnipQ: Running in demo mode. Configure Supabase credentials to go live.');
+      console.warn('SnipQ: Credentials not set — demo mode.');
+      document.getElementById('setup-conn-warn').classList.add('show');
       return;
     }
     if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-      console.warn('SnipQ: Supabase library not loaded — running in demo mode.');
+      console.warn('SnipQ: Library not ready.');
+      document.getElementById('setup-conn-warn').classList.add('show');
       return;
     }
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     dbMode = true;
     console.log('SnipQ: Supabase connected ✓');
+    document.getElementById('setup-conn-warn').classList.remove('show');
   } catch(e) {
-    console.warn('SnipQ: Supabase init failed, using demo mode.', e);
+    console.warn('SnipQ: init failed:', e);
+    document.getElementById('setup-conn-warn').classList.add('show');
   }
 }
 
@@ -919,18 +942,27 @@ function toast(msg) {
 // ================================================================
 //  INIT
 // ================================================================
+window._appReady = false;
+
 window.addEventListener('load', () => {
-  // Give Supabase CDN script time to execute after load
-  setTimeout(() => {
+  window._appReady = true;
+
+  // If Supabase script already finished loading before page load fired, init now.
+  // Otherwise initSupabase() will be called by the script's onload callback.
+  if (window._supabaseReady) {
     initSupabase();
-    if (!dbMode) document.getElementById('setup-conn-warn').classList.add('show');
-  }, 500);
+  } else if (window._supabaseReady === false) {
+    // CDN failed
+    document.getElementById('setup-conn-warn').classList.add('show');
+  }
+  // If _supabaseReady is still undefined, the script is still loading —
+  // its onload/onerror will call initSupabase() when ready.
 
   // Handle QR scan URL params
-  const p=new URLSearchParams(location.search);
-  if (p.get('join')==='1') {
-    const shop=p.get('shop');
-    if (shop) { S.shopName=decodeURIComponent(shop); S.isOpen=true; loadJoinScreen(); }
+  const p = new URLSearchParams(location.search);
+  if (p.get('join') === '1') {
+    const shop = p.get('shop');
+    if (shop) { S.shopName = decodeURIComponent(shop); S.isOpen = true; loadJoinScreen(); }
   }
 });
 </script>

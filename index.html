@@ -3,1066 +3,1331 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SnipQ — Barber Queue Platform</title>
+<title>SnipQ</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<!-- ============================================================
-  SUPABASE SETUP INSTRUCTIONS
-  ============================================================
-  1. Go to https://supabase.com and create a free account
-  2. Create a new project
-  3. Go to Project Settings > API
-  4. Copy your Project URL and anon/public key
-  5. Replace the two values below:
-  ============================================================ -->
-<script>
-  const SUPABASE_URL = 'https://sllpwaeiiirzkbduyedz.supabase.co';
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-  const ADMIN_PASSWORD = 'Fhumuandsiya1!';
-</script>
-
-<script>
-// Load Supabase — init only fires AFTER library is fully ready
-(function() {
-  var s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
-  s.onload = function() {
-    window._supabaseReady = true;
-    // Only call initSupabase if the main app script has already run
-    if (window._appReady) initSupabase();
-  };
-  s.onerror = function() {
-    console.warn('Supabase CDN failed — running in demo mode.');
-    window._supabaseReady = false;
-    var el = document.getElementById('setup-conn-warn');
-    if (el) el.classList.add('show');
-  };
-  document.head.appendChild(s);
-})();
-</script>
-
 <style>
-:root {
-  --ink: #0c0c0f; --surface: #141418; --raised: #1c1c22; --border: #26262e;
-  --gold: #f0b429; --gold2: #ffd166; --gold-glow: rgba(240,180,41,0.12);
-  --red: #ef4444; --red-dim: rgba(239,68,68,0.12);
-  --green: #22c55e; --green-dim: rgba(34,197,94,0.12);
-  --amber: #f59e0b; --amber-dim: rgba(245,158,11,0.12);
-  --blue: #3b82f6; --blue-dim: rgba(59,130,246,0.12);
-  --text: #e8e8f0; --muted: #666680; --faint: #333345;
+/* ── RESET ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --ink:#0c0c0f;--surface:#141418;--raised:#1c1c22;--border:#26262e;
+  --gold:#f0b429;--gold2:#ffd166;
+  --red:#ef4444;--red-d:rgba(239,68,68,.12);
+  --green:#22c55e;--green-d:rgba(34,197,94,.12);
+  --amber:#f59e0b;--amber-d:rgba(245,158,11,.12);
+  --blue:#3b82f6;--blue-d:rgba(59,130,246,.12);
+  --text:#e8e8f0;--muted:#666680;--faint:#2a2a35;
 }
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--ink); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; overflow-x:hidden; }
-.screen { display:none; min-height:100vh; flex-direction:column; }
-.screen.active { display:flex; }
+body{background:var(--ink);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
 
-/* LANDING */
-#s-landing { align-items:center; justify-content:center; position:relative; overflow:hidden; }
-.l-grid { position:absolute; inset:0; background-image:linear-gradient(var(--faint) 1px,transparent 1px),linear-gradient(90deg,var(--faint) 1px,transparent 1px); background-size:40px 40px; opacity:.25; mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%); }
-.l-glow { position:absolute; width:500px; height:500px; background:radial-gradient(circle,rgba(240,180,41,.15) 0%,transparent 65%); top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
-.l-inner { position:relative; z-index:2; text-align:center; padding:40px 24px; animation:riseIn .8s cubic-bezier(.16,1,.3,1) both; }
-.brand { font-family:'Bebas Neue',sans-serif; font-size:clamp(80px,20vw,130px); color:var(--gold); letter-spacing:8px; line-height:1; text-shadow:0 0 80px rgba(240,180,41,.4); }
-.tagline { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:5px; color:var(--muted); text-transform:uppercase; margin-bottom:52px; }
-.l-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:380px; margin:0 auto 16px; }
-.l-card { background:var(--raised); border:1px solid var(--border); border-radius:10px; padding:20px 16px; cursor:pointer; transition:all .25s; text-align:center; }
-.l-card:hover { border-color:var(--gold); transform:translateY(-3px); box-shadow:0 12px 40px rgba(240,180,41,.1); }
-.l-card.gold { border-color:rgba(240,180,41,.3); background:linear-gradient(135deg,var(--raised),rgba(240,180,41,.05)); }
-.l-card .ci { font-size:28px; margin-bottom:10px; }
-.l-card .cl { font-size:13px; font-weight:700; letter-spacing:1px; }
-.l-card .cs { font-size:11px; color:var(--muted); margin-top:4px; }
-.admin-lnk { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:2px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
-.admin-lnk:hover { color:var(--gold); }
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
 
-/* TOPBAR */
-.topbar { background:var(--surface); border-bottom:1px solid var(--border); padding:0 20px; height:58px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; position:sticky; top:0; z-index:100; }
-.tl { font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--gold); letter-spacing:3px; }
-.tc { font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; letter-spacing:1px; }
-.ta { display:flex; gap:8px; align-items:center; }
+/* ── TOPBAR ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);
+  height:56px;padding:0 18px;display:flex;align-items:center;
+  justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50}
+.t-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:3px}
+.t-sub{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px;margin-top:1px}
+.t-right{display:flex;gap:8px;align-items:center}
 
-/* TABS */
-.tabbar { display:flex; background:var(--surface); border-bottom:1px solid var(--border); overflow-x:auto; }
-.tabbar::-webkit-scrollbar { display:none; }
-.tab { padding:14px 18px; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; font-family:'Space Mono',monospace; }
-.tab.active { color:var(--gold); border-bottom-color:var(--gold); }
-.tp { display:none; } .tp.active { display:block; }
+/* ── TABBAR ── */
+.tabbar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.tabbar::-webkit-scrollbar{display:none}
+.tab{padding:13px 16px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;
+  font-family:'Space Mono',monospace;transition:color .2s}
+.tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.pane{display:none}.pane.on{display:block}
 
-/* BUTTONS */
-.btn { padding:10px 18px; border:none; border-radius:6px; font-family:'Syne',sans-serif; font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; letter-spacing:.3px; display:inline-flex; align-items:center; gap:6px; }
-.btn-gold { background:var(--gold); color:var(--ink); } .btn-gold:hover { background:var(--gold2); }
-.btn-red { background:var(--red-dim); color:var(--red); border:1px solid rgba(239,68,68,.3); } .btn-red:hover { background:var(--red); color:white; }
-.btn-green { background:var(--green-dim); color:var(--green); border:1px solid rgba(34,197,94,.3); } .btn-green:hover { background:var(--green); color:var(--ink); }
-.btn-ghost { background:transparent; color:var(--muted); border:1px solid var(--border); } .btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
-.btn-amber { background:var(--amber-dim); color:var(--amber); border:1px solid rgba(245,158,11,.3); } .btn-amber:hover { background:var(--amber); color:var(--ink); }
-.btn-sm { padding:7px 12px; font-size:11px; } .btn-block { width:100%; justify-content:center; padding:14px; font-size:14px; }
+/* ── BUTTONS ── */
+.btn{padding:10px 18px;border:none;border-radius:6px;font-family:'Syne',sans-serif;
+  font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+  display:inline-flex;align-items:center;gap:6px;letter-spacing:.2px}
+.b-gold{background:var(--gold);color:var(--ink)}.b-gold:hover{background:var(--gold2)}
+.b-red{background:var(--red-d);color:var(--red);border:1px solid rgba(239,68,68,.3)}.b-red:hover{background:var(--red);color:#fff}
+.b-green{background:var(--green-d);color:var(--green);border:1px solid rgba(34,197,94,.3)}.b-green:hover{background:var(--green);color:var(--ink)}
+.b-amber{background:var(--amber-d);color:var(--amber);border:1px solid rgba(245,158,11,.3)}.b-amber:hover{background:var(--amber);color:var(--ink)}
+.b-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.b-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.b-sm{padding:6px 12px;font-size:11px}
+.b-block{width:100%;justify-content:center;padding:14px;font-size:14px}
 
-/* FORMS */
-.field { margin-bottom:18px; }
-.lbl { display:block; font-size:10px; font-weight:700; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; font-family:'Space Mono',monospace; }
-.inp { width:100%; background:var(--raised); border:1.5px solid var(--border); border-radius:6px; padding:13px 15px; color:var(--text); font-family:'Syne',sans-serif; font-size:15px; outline:none; transition:border-color .2s; }
-.inp:focus { border-color:var(--gold); } .inp::placeholder { color:var(--faint); }
-select.inp { cursor:pointer; }
+/* ── FORMS ── */
+.field{margin-bottom:18px}
+.lbl{display:block;font-size:10px;font-weight:700;letter-spacing:3px;color:var(--muted);
+  text-transform:uppercase;margin-bottom:8px;font-family:'Space Mono',monospace}
+.inp{width:100%;background:var(--raised);border:1.5px solid var(--border);border-radius:6px;
+  padding:12px 14px;color:var(--text);font-family:'Syne',sans-serif;font-size:15px;
+  outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--gold)}
+.inp::placeholder{color:var(--faint)}
+select.inp{cursor:pointer}
 
-/* CARDS */
-.card { background:var(--raised); border:1px solid var(--border); border-radius:10px; padding:18px; }
-.slbl { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--muted); text-transform:uppercase; padding-bottom:10px; border-bottom:1px solid var(--border); margin-bottom:14px; }
+/* ── CARDS ── */
+.card{background:var(--raised);border:1px solid var(--border);border-radius:10px;padding:18px}
+.sec{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);
+  text-transform:uppercase;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:14px}
 
-/* BADGES */
-.badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:20px; font-size:10px; font-weight:700; letter-spacing:1px; font-family:'Space Mono',monospace; }
-.bg-green { background:var(--green-dim); color:var(--green); }
-.bg-red { background:var(--red-dim); color:var(--red); }
-.bg-amber { background:var(--amber-dim); color:var(--amber); }
-.bg-blue { background:var(--blue-dim); color:var(--blue); }
-.bg-muted { background:rgba(102,102,128,.15); color:var(--muted); }
-.dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;
+  font-size:10px;font-weight:700;letter-spacing:1px;font-family:'Space Mono',monospace}
+.bg-g{background:var(--green-d);color:var(--green)}
+.bg-r{background:var(--red-d);color:var(--red)}
+.bg-a{background:var(--amber-d);color:var(--amber)}
+.bg-b{background:var(--blue-d);color:var(--blue)}
+.bg-m{background:rgba(102,102,128,.15);color:var(--muted)}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
 
-/* SETUP */
-.sw { flex:1; padding:28px 20px; max-width:480px; margin:0 auto; width:100%; animation:riseIn .5s cubic-bezier(.16,1,.3,1) both; }
-.sh { font-family:'Bebas Neue',sans-serif; font-size:38px; color:var(--gold); letter-spacing:2px; margin-bottom:4px; }
-.ss { font-size:13px; color:var(--muted); margin-bottom:28px; line-height:1.6; }
+/* ── PAGE WRAPPER ── */
+.pg{flex:1;padding:22px 18px;max-width:560px;margin:0 auto;width:100%}
+.pg-wide{flex:1;padding:22px 18px;max-width:900px;margin:0 auto;width:100%}
 
-/* DASHBOARD */
-.dw { flex:1; padding:20px; max-width:640px; margin:0 auto; width:100%; }
-.sg { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
-.st { background:var(--raised); border:1px solid var(--border); border-radius:8px; padding:14px 10px; text-align:center; }
-.sn { font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--gold); line-height:1; }
-.sl { font-size:9px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-top:3px; font-family:'Space Mono',monospace; }
-.svnow { background:linear-gradient(135deg,var(--raised),var(--gold-glow)); border:1.5px solid rgba(240,180,41,.35); border-radius:10px; padding:16px 18px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
-.svlbl { font-size:10px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; font-family:'Space Mono',monospace; margin-bottom:4px; }
-.svname { font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px; }
-.ql { display:flex; flex-direction:column; gap:8px; }
-.qi { background:var(--raised); border:1px solid var(--border); border-radius:8px; padding:13px 15px; display:flex; align-items:center; gap:12px; animation:slideR .3s cubic-bezier(.16,1,.3,1) both; transition:border-color .2s; }
-.qi.first { border-color:rgba(240,180,41,.4); } .qi.notif { border-color:rgba(34,197,94,.3); }
-.qp { font-family:'Bebas Neue',sans-serif; font-size:30px; color:var(--gold); min-width:32px; line-height:1; }
-.qi-info { flex:1; min-width:0; }
-.qi-name { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.qi-meta { font-size:11px; color:var(--muted); margin-top:2px; font-family:'Space Mono',monospace; }
-.dbtn { background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:5px; padding:5px 10px; font-size:11px; cursor:pointer; font-family:'Syne',sans-serif; font-weight:600; transition:all .2s; white-space:nowrap; }
-.dbtn:hover { border-color:var(--green); color:var(--green); }
+/* ── LANDING ── */
+#pg-land{align-items:center;justify-content:center;position:relative;overflow:hidden}
+.land-grid{position:absolute;inset:0;
+  background-image:linear-gradient(var(--faint) 1px,transparent 1px),linear-gradient(90deg,var(--faint) 1px,transparent 1px);
+  background-size:40px 40px;opacity:.3;
+  mask-image:radial-gradient(ellipse at center,black 20%,transparent 75%)}
+.land-glow{position:absolute;width:500px;height:500px;
+  background:radial-gradient(circle,rgba(240,180,41,.15) 0%,transparent 65%);
+  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none}
+.land-inner{position:relative;z-index:2;text-align:center;padding:40px 20px;animation:rise .8s cubic-bezier(.16,1,.3,1) both}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,18vw,120px);
+  color:var(--gold);letter-spacing:8px;line-height:1;text-shadow:0 0 80px rgba(240,180,41,.4)}
+.tagline{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:5px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:48px}
+.land-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:360px;margin:0 auto 20px}
+.lc{background:var(--raised);border:1px solid var(--border);border-radius:10px;
+  padding:20px 14px;cursor:pointer;transition:all .25s;text-align:center}
+.lc:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 12px 40px rgba(240,180,41,.1)}
+.lc.gold{border-color:rgba(240,180,41,.3);background:linear-gradient(135deg,var(--raised),rgba(240,180,41,.05))}
+.lc-icon{font-size:28px;margin-bottom:10px}
+.lc-title{font-size:13px;font-weight:700;letter-spacing:1px}
+.lc-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.admin-link{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);
+  letter-spacing:2px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.admin-link:hover{color:var(--gold)}
 
-/* QR */
-.qrbox { background:var(--raised); border:1px solid var(--border); border-radius:10px; padding:24px; text-align:center; }
-#qr-render { display:inline-block; padding:12px; background:white; border-radius:8px; margin:16px 0; }
-.qrurl { font-family:'Space Mono',monospace; font-size:10px; color:var(--gold); word-break:break-all; background:var(--ink); padding:10px 14px; border-radius:5px; cursor:pointer; display:block; margin-top:8px; border:1px solid var(--border); }
-.qrurl:hover { border-color:var(--gold); }
+/* ── QUEUE ITEMS ── */
+.q-list{display:flex;flex-direction:column;gap:8px}
+.q-item{background:var(--raised);border:1px solid var(--border);border-radius:8px;
+  padding:12px 14px;display:flex;align-items:center;gap:12px;transition:border-color .2s}
+.q-item.q-first{border-color:rgba(240,180,41,.4)}
+.q-num{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--gold);min-width:28px;line-height:1}
+.q-info{flex:1;min-width:0}
+.q-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q-meta{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px}
+.done-btn{background:transparent;border:1px solid var(--border);color:var(--muted);
+  border-radius:5px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'Syne',sans-serif;
+  font-weight:600;transition:all .2s;white-space:nowrap}
+.done-btn:hover{border-color:var(--green);color:var(--green)}
 
-/* ADMIN */
-.aw { flex:1; padding:20px; max-width:900px; margin:0 auto; width:100%; }
-.atitle { font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--gold); letter-spacing:2px; }
-.asg { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:24px; }
-@media(min-width:480px){ .asg { grid-template-columns:repeat(4,1fr); } }
-.ast { background:var(--raised); border:1px solid var(--border); border-radius:8px; padding:16px 14px; }
-.asn { font-family:'Bebas Neue',sans-serif; font-size:36px; line-height:1; margin-bottom:4px; }
-.asl { font-size:9px; letter-spacing:2px; color:var(--muted); font-family:'Space Mono',monospace; text-transform:uppercase; }
-.shop-row { background:var(--raised); border:1px solid var(--border); border-radius:10px; padding:16px; animation:riseIn .4s cubic-bezier(.16,1,.3,1) both; margin-bottom:8px; }
-.shop-row.sus { border-color:rgba(239,68,68,.25); background:linear-gradient(135deg,var(--raised),rgba(239,68,68,.03)); }
-.sr-top { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.sr-name { font-size:16px; font-weight:800; margin-bottom:3px; }
-.sr-meta { font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; }
-.sr-acts { display:flex; gap:6px; flex-wrap:wrap; }
-.sr-bot { margin-top:12px; padding-top:12px; border-top:1px solid var(--border); display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-.sd { font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; }
-.sd span { color:var(--text); }
+/* ── STATS GRID ── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat{background:var(--raised);border:1px solid var(--border);border-radius:8px;padding:12px 8px;text-align:center}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--gold);line-height:1}
+.stat-l{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;font-family:'Space Mono',monospace;margin-top:2px}
 
-/* SUSPENDED */
-.sus-screen { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; text-align:center; }
-.sus-icon { font-size:56px; margin-bottom:20px; opacity:.6; }
-.sus-title { font-family:'Bebas Neue',sans-serif; font-size:40px; color:var(--red); letter-spacing:3px; margin-bottom:8px; }
-.sus-txt { font-size:14px; color:var(--muted); max-width:300px; line-height:1.7; }
+/* ── SERVING NOW ── */
+.serving{background:linear-gradient(135deg,var(--raised),rgba(240,180,41,.08));
+  border:1.5px solid rgba(240,180,41,.3);border-radius:10px;padding:14px 16px;
+  margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.sv-lbl{font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;
+  font-family:'Space Mono',monospace;margin-bottom:3px}
+.sv-name{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px}
 
-/* CLIENT */
-.cw { flex:1; display:flex; flex-direction:column; align-items:center; padding:28px 20px; max-width:420px; margin:0 auto; width:100%; }
-.bignum { font-family:'Bebas Neue',sans-serif; font-size:clamp(110px,32vw,160px); line-height:1; text-shadow:0 0 80px currentColor; }
-.bgold { color:var(--gold); } .bgreen { color:var(--green); }
-.firstalert { width:100%; margin-bottom:20px; background:var(--green-dim); border:1.5px solid rgba(34,197,94,.4); border-radius:10px; padding:20px; text-align:center; animation:pulse 2.5s infinite; }
-.fa-icon { font-size:32px; margin-bottom:8px; }
-.fa-title { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--green); letter-spacing:2px; }
-.fa-sub { font-size:13px; color:var(--muted); margin-top:4px; }
-.tcard { width:100%; background:var(--raised); border:1px solid var(--border); border-radius:10px; padding:18px; margin-top:20px; }
-.tr { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--border); }
-.tr:last-child { border:none; }
-.tk { font-size:10px; letter-spacing:2px; color:var(--muted); font-family:'Space Mono',monospace; text-transform:uppercase; }
-.tv { font-size:13px; font-weight:700; font-family:'Space Mono',monospace; }
-.lp { display:inline-block; width:7px; height:7px; background:var(--green); border-radius:50%; margin-right:5px; animation:blink 1.5s infinite; }
+/* ── QR BOX ── */
+.qr-box{background:var(--raised);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center}
+#qr-canvas{display:inline-block;padding:10px;background:#fff;border-radius:6px;margin:14px 0}
+.qr-url{font-family:'Space Mono',monospace;font-size:10px;color:var(--gold);word-break:break-all;
+  background:var(--ink);padding:10px 12px;border-radius:5px;cursor:pointer;
+  display:block;margin-top:8px;border:1px solid var(--border)}
+.qr-url:hover{border-color:var(--gold)}
 
-/* LOGIN */
-.lw { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; animation:riseIn .5s ease both; }
-.lcard { background:var(--raised); border:1px solid var(--border); border-radius:12px; padding:32px 28px; width:100%; max-width:380px; }
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;gap:12px;padding:12px 0}
+.toggle-info{flex:1}
+.ti-label{font-size:14px;font-weight:600}
+.ti-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.pill{width:44px;height:24px;border-radius:12px;background:var(--faint);position:relative;
+  cursor:pointer;transition:background .3s;flex-shrink:0}
+.pill.on{background:var(--green)}
+.pill::after{content:'';position:absolute;width:18px;height:18px;background:#fff;
+  border-radius:50%;top:3px;left:3px;transition:transform .3s}
+.pill.on::after{transform:translateX(20px)}
+.count-ctrl{display:flex;align-items:center;gap:10px}
+.cnt-btn{width:32px;height:32px;background:var(--raised);border:1px solid var(--border);
+  border-radius:5px;color:var(--text);font-size:18px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;transition:all .2s}
+.cnt-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cnt-val{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);min-width:24px;text-align:center}
 
-/* MODAL */
-.mo { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:500; padding:20px; animation:fadeIn .2s ease both; }
-.mo.hidden { display:none; }
-.mbox { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:28px; width:100%; max-width:420px; animation:riseIn .3s cubic-bezier(.16,1,.3,1) both; }
-.mtitle { font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--gold); letter-spacing:2px; margin-bottom:6px; }
-.mbody { font-size:13px; color:var(--muted); margin-bottom:22px; line-height:1.6; }
-.macts { display:flex; gap:10px; margin-top:20px; }
-.macts .btn { flex:1; justify-content:center; }
+/* ── CLIENT VIEW ── */
+.client-wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:24px 18px;max-width:420px;margin:0 auto;width:100%}
+.bignum{font-family:'Bebas Neue',sans-serif;font-size:clamp(110px,30vw,160px);line-height:1;text-shadow:0 0 80px currentColor}
+.c-gold{color:var(--gold)}.c-green{color:var(--green)}
+.next-alert{width:100%;margin-bottom:18px;background:var(--green-d);
+  border:1.5px solid rgba(34,197,94,.4);border-radius:10px;padding:18px;text-align:center;
+  animation:pulse 2.5s infinite}
+.na-icon{font-size:30px;margin-bottom:6px}
+.na-title{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--green);letter-spacing:2px}
+.na-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.ticket{width:100%;background:var(--raised);border:1px solid var(--border);border-radius:10px;padding:16px;margin-top:18px}
+.t-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.t-row:last-child{border:none}
+.t-k{font-size:10px;letter-spacing:2px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase}
+.t-v{font-size:13px;font-weight:700;font-family:'Space Mono',monospace}
+.live-dot{display:inline-block;width:7px;height:7px;background:var(--green);border-radius:50%;margin-right:5px;animation:blink 1.5s infinite}
 
-/* PLAN BADGES */
-.pb { display:inline-block; padding:2px 8px; border-radius:4px; font-size:9px; font-weight:700; letter-spacing:2px; font-family:'Space Mono',monospace; text-transform:uppercase; }
-.pf { background:var(--blue-dim); color:var(--blue); }
-.pp { background:var(--gold-glow); color:var(--gold); }
-.px { background:linear-gradient(90deg,rgba(240,180,41,.2),rgba(255,209,102,.2)); color:var(--gold2); }
+/* ── ADMIN ── */
+.admin-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:22px}
+@media(min-width:480px){.admin-stats{grid-template-columns:repeat(4,1fr)}}
+.a-stat{background:var(--raised);border:1px solid var(--border);border-radius:8px;padding:14px 12px}
+.a-sn{font-family:'Bebas Neue',sans-serif;font-size:34px;line-height:1;margin-bottom:3px}
+.a-sl{font-size:9px;letter-spacing:2px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase}
+.shop-row{background:var(--raised);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px}
+.shop-row.sus{border-color:rgba(239,68,68,.25);background:linear-gradient(135deg,var(--raised),rgba(239,68,68,.03))}
+.sr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sr-name{font-size:15px;font-weight:800;margin-bottom:2px}
+.sr-meta{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace}
+.sr-btns{display:flex;gap:6px;flex-wrap:wrap}
+.sr-bot{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sr-detail{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace}
+.sr-detail span{color:var(--text)}
+.plan-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700;
+  letter-spacing:2px;font-family:'Space Mono',monospace;text-transform:uppercase}
+.pt-free{background:var(--blue-d);color:var(--blue)}
+.pt-pro{background:rgba(240,180,41,.15);color:var(--gold)}
+.pt-premium{background:linear-gradient(90deg,rgba(240,180,41,.2),rgba(255,209,102,.2));color:var(--gold2)}
+.rev-big{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--gold);letter-spacing:2px;line-height:1}
 
-/* MISC */
-.toggle-row { display:flex; align-items:center; gap:12px; padding:14px 0; }
-.ti { flex:1; } .ti-l { font-size:14px; font-weight:600; } .ti-s { font-size:12px; color:var(--muted); margin-top:2px; }
-.pill { width:44px; height:24px; border-radius:12px; background:var(--faint); position:relative; cursor:pointer; transition:background .3s; flex-shrink:0; }
-.pill.on { background:var(--green); }
-.pill::after { content:''; position:absolute; width:18px; height:18px; background:white; border-radius:50%; top:3px; left:3px; transition:transform .3s; }
-.pill.on::after { transform:translateX(20px); }
-.cc { display:flex; align-items:center; gap:10px; }
-.cb { width:34px; height:34px; background:var(--raised); border:1px solid var(--border); border-radius:5px; color:var(--text); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
-.cb:hover { border-color:var(--gold); color:var(--gold); }
-.cv { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--gold); min-width:28px; text-align:center; }
-.empty { text-align:center; padding:40px 20px; color:var(--muted); }
-.ei { font-size:36px; margin-bottom:12px; opacity:.3; }
-.et { font-size:12px; letter-spacing:1px; line-height:1.8; }
-.revbig { font-family:'Bebas Neue',sans-serif; font-size:52px; color:var(--gold); letter-spacing:2px; line-height:1; }
-.conn-banner { background:var(--amber-dim); border:1px solid rgba(245,158,11,.3); border-radius:8px; padding:12px 16px; font-size:12px; color:var(--amber); margin-bottom:16px; display:none; }
-.conn-banner.show { display:block; }
+/* ── SUSPENDED ── */
+.sus-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center}
 
-/* ANIMATIONS */
-@keyframes riseIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-@keyframes slideR { from { opacity:0; transform:translateX(-12px); } to { opacity:1; transform:translateX(0); } }
-@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-@keyframes pulse { 0%,100% { box-shadow:0 0 0 0 rgba(34,197,94,.25); } 50% { box-shadow:0 0 20px 6px rgba(34,197,94,.1); } }
-@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.2; } }
-.toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%); background:var(--raised); border:1px solid var(--border); color:var(--text); padding:12px 22px; border-radius:8px; font-size:13px; font-weight:600; z-index:9999; white-space:nowrap; max-width:90vw; text-align:center; animation:riseIn .3s ease both; box-shadow:0 8px 32px rgba(0,0,0,.4); }
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;
+  align-items:center;justify-content:center;z-index:200;padding:20px;animation:fade .2s ease}
+.overlay.hide{display:none}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:26px;width:100%;max-width:400px;animation:rise .3s cubic-bezier(.16,1,.3,1)}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
+.modal-body{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+.modal-btns{display:flex;gap:10px}
+.modal-btns .btn{flex:1;justify-content:center}
+
+/* ── MISC ── */
+.warn-box{background:var(--amber-d);border:1px solid rgba(245,158,11,.3);border-radius:8px;
+  padding:11px 14px;font-size:12px;color:var(--amber);margin-bottom:16px;display:none}
+.warn-box.show{display:block}
+.empty-state{text-align:center;padding:36px 16px;color:var(--muted)}
+.empty-icon{font-size:32px;margin-bottom:10px;opacity:.3}
+.empty-text{font-size:12px;line-height:1.8}
+.divider{height:1px;background:var(--border);margin:18px 0}
+
+/* ── SEARCH RESULT SHOPS ── */
+.shop-result{background:var(--raised);border:1px solid var(--border);border-radius:8px;
+  padding:14px;cursor:pointer;margin-bottom:8px;transition:border-color .2s}
+.shop-result:hover{border-color:var(--gold)}
+
+/* ── ANIMATIONS ── */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.2)}50%{box-shadow:0 0 18px 5px rgba(34,197,94,.08)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:var(--raised);
+  border:1px solid var(--border);color:var(--text);padding:11px 20px;border-radius:8px;
+  font-size:13px;font-weight:600;z-index:9999;white-space:nowrap;max-width:90vw;text-align:center;
+  animation:rise .3s ease;box-shadow:0 8px 28px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
 
-<!-- LANDING -->
-<div id="s-landing" class="screen active">
-  <div class="l-grid"></div><div class="l-glow"></div>
-  <div class="l-inner">
+<!-- ═══════════════════════════════════════════
+     LANDING
+═══════════════════════════════════════════ -->
+<div id="pg-land" class="screen active">
+  <div class="land-grid"></div>
+  <div class="land-glow"></div>
+  <div class="land-inner">
     <div class="brand">SnipQ</div>
-    <div class="tagline">Virtual Barber Queue · No App Required</div>
-    <div class="l-cards">
-      <div class="l-card gold" onclick="go('s-setup')"><div class="ci">✂️</div><div class="cl">I'm a Barber</div><div class="cs">Set up my queue</div></div>
-      <div class="l-card" onclick="clientEntryFlow()"><div class="ci">💈</div><div class="cl">I'm a Client</div><div class="cs">Join a queue</div></div>
+    <div class="tagline">Virtual Barber Queue · No App Needed</div>
+    <div class="land-cards">
+      <div class="lc gold" onclick="show('pg-setup')">
+        <div class="lc-icon">✂️</div>
+        <div class="lc-title">I'm a Barber</div>
+        <div class="lc-sub">Set up my queue</div>
+      </div>
+      <div class="lc" onclick="show('pg-search')">
+        <div class="lc-icon">💈</div>
+        <div class="lc-title">I'm a Client</div>
+        <div class="lc-sub">Join a queue</div>
+      </div>
     </div>
-    <div class="admin-lnk" onclick="go('s-admin-login')">Admin / Owner Portal →</div>
+    <div class="admin-link" onclick="show('pg-admin-login')">Admin / Owner Portal →</div>
   </div>
 </div>
 
-<!-- BARBER SETUP -->
-<div id="s-setup" class="screen">
-  <div class="topbar"><div><div class="tl">SnipQ</div></div><div class="ta"><button class="btn btn-ghost btn-sm" onclick="go('s-landing')">← Back</button></div></div>
-  <div class="sw">
-    <div class="sh">Set Up Your Shop</div>
-    <div class="ss">Get your queue live in under a minute.</div>
-    <div class="conn-banner" id="setup-conn-warn">⚠️ Database not connected — running in demo mode. See setup guide to go live.</div>
+<!-- ═══════════════════════════════════════════
+     BARBER SETUP
+═══════════════════════════════════════════ -->
+<div id="pg-setup" class="screen">
+  <div class="topbar">
+    <div><div class="t-logo">SnipQ</div></div>
+    <div class="t-right"><button class="btn b-ghost b-sm" onclick="show('pg-land')">← Back</button></div>
+  </div>
+  <div class="pg">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);letter-spacing:2px;margin-bottom:4px">Set Up Your Shop</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6">Get your virtual queue live in under a minute.</div>
+    <div class="warn-box" id="demo-warn">⚠️ Database not connected — running in demo mode.</div>
     <div class="field"><label class="lbl">Shop Name</label><input class="inp" id="inp-shop" placeholder="e.g. Kasi Cutz…" maxlength="40"></div>
     <div class="field"><label class="lbl">Your Name</label><input class="inp" id="inp-barber" placeholder="e.g. Bra T…" maxlength="30"></div>
     <div class="field">
       <label class="lbl">Barbers Working Today</label>
-      <div class="cc" style="margin-top:4px;"><button class="cb" onclick="adjB(-1)">−</button><div class="cv" id="bc">1</div><button class="cb" onclick="adjB(1)">+</button></div>
+      <div class="count-ctrl" style="margin-top:6px">
+        <button class="cnt-btn" onclick="adjB(-1)">−</button>
+        <div class="cnt-val" id="cnt-b">1</div>
+        <button class="cnt-btn" onclick="adjB(1)">+</button>
+      </div>
     </div>
-    <button class="btn btn-gold btn-block" onclick="launchShop()">Launch My Queue →</button>
+    <button class="btn b-gold b-block" onclick="launchShop()">Launch My Queue →</button>
   </div>
 </div>
 
-<!-- BARBER DASHBOARD -->
-<div id="s-dash" class="screen">
-  <div class="topbar"><div><div class="tl">SnipQ</div><div class="tc" id="d-shopname">—</div></div><div class="ta"><button class="btn btn-ghost btn-sm" onclick="confirmReset()">Reset</button></div></div>
+<!-- ═══════════════════════════════════════════
+     BARBER DASHBOARD
+═══════════════════════════════════════════ -->
+<div id="pg-dash" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="t-logo">SnipQ</div>
+      <div class="t-sub" id="dash-name">—</div>
+    </div>
+    <div class="t-right">
+      <button class="btn b-ghost b-sm" onclick="doReset()">Reset</button>
+    </div>
+  </div>
   <div class="tabbar">
-    <div class="tab active" onclick="dTab('tq',this)">Queue</div>
-    <div class="tab" onclick="dTab('tqr',this)">QR Code</div>
-    <div class="tab" onclick="dTab('tcfg',this)">Settings</div>
+    <div class="tab on" onclick="dtab('dp-queue',this)">Queue</div>
+    <div class="tab" onclick="dtab('dp-qr',this)">QR Code</div>
+    <div class="tab" onclick="dtab('dp-settings',this)">Settings</div>
   </div>
-  <div class="dw">
-    <div id="tq" class="tp active">
-      <div class="sg">
-        <div class="st"><div class="sn" id="sw">0</div><div class="sl">Waiting</div></div>
-        <div class="st"><div class="sn" id="ss">0</div><div class="sl">Served</div></div>
-        <div class="st"><div class="sn" id="sb">1</div><div class="sl">Barbers</div></div>
+  <div style="flex:1;padding:18px;max-width:640px;margin:0 auto;width:100%">
+
+    <!-- QUEUE PANE -->
+    <div id="dp-queue" class="pane on">
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="st-waiting">0</div><div class="stat-l">Waiting</div></div>
+        <div class="stat"><div class="stat-n" id="st-served">0</div><div class="stat-l">Served</div></div>
+        <div class="stat"><div class="stat-n" id="st-barbers">1</div><div class="stat-l">Barbers</div></div>
       </div>
-      <div id="svwrap" style="display:none;"><div class="svnow"><div><div class="svlbl">Now Being Served</div><div class="svname" id="svname">—</div></div><span class="badge bg-green"><span class="dot"></span>LIVE</span></div></div>
-      <div class="slbl">Queue</div>
-      <div class="ql" id="qlist"><div class="empty"><div class="ei">✂️</div><div class="et">Queue is empty.<br>Share your QR to get clients in.</div></div></div>
-    </div>
-    <div id="tqr" class="tp">
-      <div class="qrbox">
-        <div class="slbl" style="border:none;margin-bottom:4px;">Your Queue QR Code</div>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:4px;">Print & stick on your door. Clients scan to join instantly.</p>
-        <div id="qr-render"></div>
-        <p style="font-size:11px;color:var(--muted);">Tap to copy link</p>
-        <div class="qrurl" id="qr-url" onclick="copyURL()">—</div>
-        <button class="btn btn-gold btn-block" style="margin-top:14px;" onclick="copyURL()">📋 Copy Link</button>
+      <div id="serving-wrap" style="display:none">
+        <div class="serving">
+          <div>
+            <div class="sv-lbl">Now Being Served</div>
+            <div class="sv-name" id="serving-name">—</div>
+          </div>
+          <span class="badge bg-g"><span class="dot"></span>LIVE</span>
+        </div>
+      </div>
+      <div class="sec">Queue</div>
+      <div class="q-list" id="q-list">
+        <div class="empty-state"><div class="empty-icon">✂️</div><div class="empty-text">Queue empty.<br>Share your QR to get clients in.</div></div>
       </div>
     </div>
-    <div id="tcfg" class="tp">
+
+    <!-- QR PANE -->
+    <div id="dp-qr" class="pane">
+      <div class="qr-box">
+        <div class="sec" style="border:none;margin-bottom:4px">Your Queue QR Code</div>
+        <p style="font-size:12px;color:var(--muted)">Print & stick on your door. Clients scan to join — no app needed.</p>
+        <div id="qr-canvas"></div>
+        <p style="font-size:11px;color:var(--muted)">Tap link to copy</p>
+        <div class="qr-url" id="qr-url-text" onclick="copyURL()">—</div>
+        <button class="btn b-gold b-block" style="margin-top:14px" onclick="copyURL()">📋 Copy Queue Link</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS PANE -->
+    <div id="dp-settings" class="pane">
       <div class="card">
-        <div class="slbl">Queue Status</div>
-        <div class="toggle-row"><div class="ti"><div class="ti-l">Accept New Clients</div><div class="ti-s">Turn off to stop new clients joining</div></div><div class="pill on" id="open-pill" onclick="toggleOpen()"></div></div>
+        <div class="sec">Queue Status</div>
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="ti-label">Accept New Clients</div>
+            <div class="ti-sub">Turn off to stop new clients joining</div>
+          </div>
+          <div class="pill on" id="open-pill" onclick="toggleOpen()"></div>
+        </div>
       </div>
-      <div class="card" style="margin-top:10px;">
-        <div class="slbl">Active Barbers</div>
-        <div class="toggle-row"><div class="ti"><div class="ti-l">Barbers working now</div></div><div class="cc"><button class="cb" onclick="adjB(-1)">−</button><div class="cv" id="bc2">1</div><button class="cb" onclick="adjB(1)">+</button></div></div>
+      <div class="card" style="margin-top:10px">
+        <div class="sec">Active Barbers</div>
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="ti-label">Barbers working now</div></div>
+          <div class="count-ctrl">
+            <button class="cnt-btn" onclick="adjB(-1)">−</button>
+            <div class="cnt-val" id="cnt-b2">1</div>
+            <button class="cnt-btn" onclick="adjB(1)">+</button>
+          </div>
+        </div>
       </div>
-      <div class="card" style="margin-top:10px;"><div class="slbl">Danger Zone</div><button class="btn btn-red btn-block" onclick="clearQ()">🗑 Clear Entire Queue</button></div>
+      <div class="card" style="margin-top:10px">
+        <div class="sec">Danger Zone</div>
+        <button class="btn b-red b-block" onclick="clearQueue()">🗑 Clear Entire Queue</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CLIENT SEARCH (find a shop)
+═══════════════════════════════════════════ -->
+<div id="pg-search" class="screen">
+  <div class="topbar">
+    <div><div class="t-logo">SnipQ</div></div>
+    <div class="t-right"><button class="btn b-ghost b-sm" onclick="show('pg-land')">← Back</button></div>
+  </div>
+  <div class="pg">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);letter-spacing:2px;margin-bottom:4px">Find a Shop</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6">Enter the shop name to join their live queue.</div>
+    <div class="field">
+      <label class="lbl">Shop Name</label>
+      <input class="inp" id="inp-search" placeholder="e.g. Kasi Cutz…" maxlength="40" onkeydown="if(event.key==='Enter')searchShop()">
+    </div>
+    <button class="btn b-gold b-block" onclick="searchShop()">Search →</button>
+    <div id="search-results" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CLIENT JOIN
+═══════════════════════════════════════════ -->
+<div id="pg-join" class="screen">
+  <div class="topbar">
+    <div><div class="t-logo">SnipQ</div></div>
+    <div class="t-right"><button class="btn b-ghost b-sm" onclick="show('pg-search')">← Back</button></div>
+  </div>
+  <div class="pg">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--gold);letter-spacing:2px;margin-bottom:4px" id="join-shop-name">Shop</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Join the virtual queue. You'll be alerted when it's your turn.</div>
+    <div id="join-closed-msg" style="display:none;background:var(--red-d);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--red);text-align:center">⚠️ This shop is not accepting new clients right now.</div>
+    <div class="card" style="margin-bottom:18px;display:flex;align-items:center;gap:14px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--gold);line-height:1" id="join-q-count">0</div>
+      <div>
+        <div style="font-size:14px;font-weight:700" id="join-q-label">people in queue</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="join-q-sub">You'll be next after them</div>
+      </div>
+    </div>
+    <div class="field"><label class="lbl">Your Name</label><input class="inp" id="inp-client-name" placeholder="Enter your name…" maxlength="30"></div>
+    <button class="btn b-gold b-block" id="join-btn" onclick="joinQueue()">Join Queue →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CLIENT WAITING VIEW
+═══════════════════════════════════════════ -->
+<div id="pg-client" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="t-logo">SnipQ</div>
+      <div class="t-sub" id="client-shop-name">—</div>
+    </div>
+    <div class="t-right">
+      <button class="btn b-red b-sm" onclick="leaveQueue()">Leave Queue</button>
+    </div>
+  </div>
+  <div class="client-wrap">
+    <div id="next-alert" class="next-alert" style="display:none">
+      <div class="na-icon">✂️</div>
+      <div class="na-title">You're Up Next!</div>
+      <div class="na-sub">Head to the chair — the barber is ready!</div>
+    </div>
+    <div style="text-align:center;margin:20px 0 8px">
+      <div style="font-size:10px;letter-spacing:4px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;margin-bottom:10px">Your Position</div>
+      <div class="bignum c-gold" id="client-pos">—</div>
+      <div style="font-size:15px;font-weight:600;margin-top:8px" id="client-status">Waiting in queue</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px" id="client-ahead"></div>
+    </div>
+    <div class="ticket">
+      <div class="t-row"><div class="t-k">Name</div><div class="t-v" id="tkt-name">—</div></div>
+      <div class="t-row"><div class="t-k">Ticket</div><div class="t-v" id="tkt-num">—</div></div>
+      <div class="t-row"><div class="t-k">Shop</div><div class="t-v" id="tkt-shop">—</div></div>
+      <div class="t-row"><div class="t-k">Status</div><div class="t-v"><span class="live-dot"></span>Live</div></div>
     </div>
   </div>
 </div>
 
-<!-- SHOP SEARCH -->
-<div id="s-shop-search" class="screen">
-  <div class="topbar"><div class="tl">SnipQ</div><div class="ta"><button class="btn btn-ghost btn-sm" onclick="go('s-landing')">← Back</button></div></div>
-  <div class="sw">
-    <div class="sh">Find a Shop</div>
-    <div class="ss">Enter the barbershop name to join their live queue.</div>
-    <div class="field"><label class="lbl">Shop Name</label><input class="inp" id="inp-search-shop" placeholder="e.g. Kasi Cutz…" maxlength="40" onkeydown="if(event.key==='Enter')searchShop()"></div>
-    <button class="btn btn-gold btn-block" onclick="searchShop()">Find Queue →</button>
-    <div id="search-result" style="margin-top:16px;"></div>
+<!-- ═══════════════════════════════════════════
+     SUSPENDED
+═══════════════════════════════════════════ -->
+<div id="pg-suspended" class="screen">
+  <div class="topbar"><div class="t-logo">SnipQ</div></div>
+  <div class="sus-wrap">
+    <div style="font-size:52px;margin-bottom:18px;opacity:.6">🔒</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--red);letter-spacing:3px;margin-bottom:8px">Shop Unavailable</div>
+    <div style="font-size:14px;color:var(--muted);max-width:280px;line-height:1.7">This barbershop's SnipQ account is currently suspended. Please contact the shop directly.</div>
   </div>
 </div>
 
-<!-- CLIENT JOIN -->
-<div id="s-join" class="screen">
-  <div class="topbar"><div class="tl">SnipQ</div></div>
-  <div class="sw">
-    <div class="sh" id="j-shopname">Shop</div>
-    <div class="ss">Join the virtual queue. We'll alert you when it's your turn.</div>
-    <div id="j-closed" style="display:none;background:var(--red-dim);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:14px;margin-bottom:20px;font-size:13px;color:var(--red);text-align:center;">⚠️ This shop is not accepting new clients right now.</div>
-    <div class="card" style="margin-bottom:20px;display:flex;align-items:center;gap:16px;">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--gold);line-height:1;" id="j-count">0</div>
-      <div><div style="font-size:14px;font-weight:700;" id="j-lbl">people in queue</div><div style="font-size:12px;color:var(--muted);margin-top:2px;" id="j-sub">You'll be next after them</div></div>
-    </div>
-    <div class="field"><label class="lbl">Your Name</label><input class="inp" id="inp-client" placeholder="Enter your name…" maxlength="30"></div>
-    <button class="btn btn-gold btn-block" id="jbtn" onclick="joinQ()">Join Queue →</button>
-    <button class="btn btn-ghost btn-block" style="margin-top:10px;" onclick="go('s-landing')">← Back</button>
+<!-- ═══════════════════════════════════════════
+     ADMIN LOGIN
+═══════════════════════════════════════════ -->
+<div id="pg-admin-login" class="screen">
+  <div class="topbar">
+    <div><div class="t-logo">SnipQ</div></div>
+    <div class="t-right"><button class="btn b-ghost b-sm" onclick="show('pg-land')">← Back</button></div>
   </div>
-</div>
-
-<!-- CLIENT VIEW -->
-<div id="s-client" class="screen">
-  <div class="topbar"><div><div class="tl">SnipQ</div><div class="tc" id="cv-shop">—</div></div><div class="ta"><button class="btn btn-red btn-sm" onclick="leaveQ()">Leave Queue</button></div></div>
-  <div class="cw">
-    <div id="cv-alert" class="firstalert" style="display:none;"><div class="fa-icon">✂️</div><div class="fa-title">You're Up Next!</div><div class="fa-sub">Head to the chair — the barber is ready!</div></div>
-    <div style="text-align:center;margin:24px 0 8px;">
-      <div style="font-size:10px;letter-spacing:4px;color:var(--muted);font-family:'Space Mono',monospace;text-transform:uppercase;margin-bottom:10px;">Your Position</div>
-      <div class="bignum bgold" id="cv-pos">—</div>
-      <div style="font-size:15px;font-weight:600;margin-top:8px;" id="cv-status">Waiting…</div>
-      <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="cv-ahead"></div>
-    </div>
-    <div class="tcard">
-      <div class="tr"><div class="tk">Name</div><div class="tv" id="tv-name">—</div></div>
-      <div class="tr"><div class="tk">Ticket</div><div class="tv" id="tv-ticket">—</div></div>
-      <div class="tr"><div class="tk">Shop</div><div class="tv" id="tv-shop">—</div></div>
-      <div class="tr"><div class="tk">Status</div><div class="tv"><span class="lp"></span>Live</div></div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px">
+    <div style="background:var(--raised);border:1px solid var(--border);border-radius:12px;padding:30px 26px;width:100%;max-width:360px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--gold);letter-spacing:2px;margin-bottom:4px">Admin Portal</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:22px">SnipQ owner access only</div>
+      <div class="field">
+        <label class="lbl">Password</label>
+        <input class="inp" id="admin-pw" type="password" placeholder="Enter password…" onkeydown="if(event.key==='Enter')adminLogin()">
+      </div>
+      <button class="btn b-gold b-block" onclick="adminLogin()">Login →</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:12px;text-align:center;font-family:'Space Mono',monospace">
+        Default: <strong style="color:var(--gold)">admin123</strong>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- SUSPENDED -->
-<div id="s-sus" class="screen">
-  <div class="topbar"><div class="tl">SnipQ</div></div>
-  <div class="sus-screen"><div class="sus-icon">🔒</div><div class="sus-title">Shop Unavailable</div><div class="sus-txt">This barbershop's SnipQ account is currently suspended. Please contact the shop directly.</div></div>
-</div>
-
-<!-- ADMIN LOGIN -->
-<div id="s-admin-login" class="screen">
-  <div class="topbar"><div class="tl">SnipQ</div><button class="btn btn-ghost btn-sm" onclick="go('s-landing')">← Back</button></div>
-  <div class="lw">
-    <div class="lcard">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--gold);letter-spacing:2px;margin-bottom:4px;">Admin Portal</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:24px;">SnipQ owner access only</div>
-      <div class="field"><label class="lbl">Password</label><input class="inp" id="apw" type="password" placeholder="Enter admin password…" onkeydown="if(event.key==='Enter')adminLogin()"></div>
-      <button class="btn btn-gold btn-block" onclick="adminLogin()">Login →</button>
-      <div style="font-size:11px;color:var(--muted);margin-top:14px;text-align:center;font-family:'Space Mono',monospace;">Default: <strong style="color:var(--gold)">admin123</strong> — change in code</div>
+<!-- ═══════════════════════════════════════════
+     ADMIN DASHBOARD
+═══════════════════════════════════════════ -->
+<div id="pg-admin" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="t-logo">SnipQ</div>
+      <div class="t-sub">ADMIN PORTAL</div>
+    </div>
+    <div class="t-right">
+      <button class="btn b-ghost b-sm" onclick="show('pg-land')">← Exit</button>
     </div>
   </div>
-</div>
-
-<!-- ADMIN DASHBOARD -->
-<div id="s-admin" class="screen">
-  <div class="topbar"><div><div class="tl">SnipQ</div><div class="tc">ADMIN PORTAL</div></div><div class="ta"><button class="btn btn-ghost btn-sm" onclick="go('s-landing')">← Exit</button></div></div>
   <div class="tabbar">
-    <div class="tab active" onclick="aTab('at-s',this)">Shops</div>
-    <div class="tab" onclick="aTab('at-r',this)">Revenue</div>
-    <div class="tab" onclick="aTab('at-a',this)">+ Add Shop</div>
+    <div class="tab on" onclick="atab('ap-shops',this)">Shops</div>
+    <div class="tab" onclick="atab('ap-revenue',this)">Revenue</div>
+    <div class="tab" onclick="atab('ap-add',this)">+ Add Shop</div>
   </div>
-  <div class="aw">
-    <div id="at-s" class="tp active">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;"><div class="atitle">All Shops</div></div>
-      <div class="asg" id="a-stats"></div>
-      <div class="slbl">Registered Shops</div>
-      <div id="a-shops"></div>
+  <div style="flex:1;padding:18px;max-width:900px;margin:0 auto;width:100%">
+
+    <!-- SHOPS PANE -->
+    <div id="ap-shops" class="pane on">
+      <div class="admin-stats" id="admin-stat-grid"></div>
+      <div class="sec">Registered Shops</div>
+      <div id="admin-shop-list"></div>
     </div>
-    <div id="at-r" class="tp">
-      <div style="margin-bottom:20px;"><div class="atitle">Revenue</div></div>
-      <div class="card" style="margin-bottom:16px;"><div style="font-size:11px;letter-spacing:3px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:8px;">MONTHLY RECURRING REVENUE</div><div class="revbig" id="r-mrr">R 0</div><div style="font-size:12px;color:var(--muted);margin-top:6px;" id="r-sub">from 0 paying shops</div></div>
-      <div id="r-table"></div>
+
+    <!-- REVENUE PANE -->
+    <div id="ap-revenue" class="pane">
+      <div class="card" style="margin-bottom:16px">
+        <div style="font-size:10px;letter-spacing:3px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:8px">MONTHLY RECURRING REVENUE</div>
+        <div class="rev-big" id="rev-mrr">R 0</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:5px" id="rev-sub">from 0 paying shops</div>
+      </div>
+      <div id="rev-list"></div>
     </div>
-    <div id="at-a" class="tp">
-      <div style="margin-bottom:20px;"><div class="atitle">Register New Shop</div></div>
+
+    <!-- ADD SHOP PANE -->
+    <div id="ap-add" class="pane">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);letter-spacing:2px;margin-bottom:16px">Register New Shop</div>
       <div class="card">
-        <div class="field"><label class="lbl">Shop Name</label><input class="inp" id="as-n" placeholder="e.g. Kasi Cutz"></div>
-        <div class="field"><label class="lbl">Owner Name</label><input class="inp" id="as-o" placeholder="e.g. Sipho Nkosi"></div>
-        <div class="field"><label class="lbl">Phone</label><input class="inp" id="as-p" placeholder="e.g. 082 555 1234" type="tel"></div>
-        <div class="field"><label class="lbl">Plan</label><select class="inp" id="as-pl"><option value="free">Free — R0/month</option><option value="pro">Pro — R299/month</option><option value="premium">Premium — R599/month</option></select></div>
-        <button class="btn btn-gold btn-block" onclick="addShop()">Register Shop →</button>
+        <div class="field"><label class="lbl">Shop Name</label><input class="inp" id="new-shop-name" placeholder="e.g. Kasi Cutz"></div>
+        <div class="field"><label class="lbl">Owner Name</label><input class="inp" id="new-shop-owner" placeholder="e.g. Sipho Nkosi"></div>
+        <div class="field"><label class="lbl">Phone</label><input class="inp" id="new-shop-phone" placeholder="e.g. 082 555 1234" type="tel"></div>
+        <div class="field">
+          <label class="lbl">Plan</label>
+          <select class="inp" id="new-shop-plan">
+            <option value="free">Free — R0/month</option>
+            <option value="pro">Pro — R299/month</option>
+            <option value="premium">Premium — R599/month</option>
+          </select>
+        </div>
+        <button class="btn b-gold b-block" onclick="addShop()">Register Shop →</button>
       </div>
     </div>
+
   </div>
 </div>
 
-<!-- MODAL -->
-<div id="modal" class="mo hidden">
-  <div class="mbox">
-    <div class="mtitle" id="m-title">Confirm</div>
-    <div class="mbody" id="m-body">Are you sure?</div>
-    <div class="macts"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn" id="m-btn" onclick="doModal()">Confirm</button></div>
+<!-- ═══════════════════════════════════════════
+     MODAL
+═══════════════════════════════════════════ -->
+<div id="modal-overlay" class="overlay hide">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Confirm</div>
+    <div class="modal-body" id="modal-body">Are you sure?</div>
+    <div class="modal-btns">
+      <button class="btn b-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn" id="modal-ok" onclick="confirmModal()">OK</button>
+    </div>
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════ -->
 <script>
-// ================================================================
-//  SUPABASE CLIENT
-// ================================================================
-let supabase = null;
-let dbMode = false; // true = Supabase connected, false = demo mode
+// ─────────────────────────────────────────────
+//  CONFIG  ← Edit these three lines
+// ─────────────────────────────────────────────
+const SUPABASE_URL      = 'https://sllpwaeiiirzkbduyedz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsbHB3YWVpaWlyemtiZHV5ZWR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjEwNzIsImV4cCI6MjA4ODE5NzA3Mn0.Ro-lmBU1RdrF0j0LYtDLNc89Eagu56whcXI7hWPo5uI';
+const ADMIN_PASSWORD    = 'Fhumuandsiya1!';
 
-function initSupabase() {
-  try {
-    if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY') {
-      console.warn('SnipQ: Credentials not set — demo mode.');
-      document.getElementById('setup-conn-warn').classList.add('show');
-      return;
-    }
-    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
-      console.warn('SnipQ: Library not ready.');
-      document.getElementById('setup-conn-warn').classList.add('show');
-      return;
-    }
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    dbMode = true;
-    console.log('SnipQ: Supabase connected ✓');
-    document.getElementById('setup-conn-warn').classList.remove('show');
-  } catch(e) {
-    console.warn('SnipQ: init failed:', e);
-    document.getElementById('setup-conn-warn').classList.add('show');
-  }
-}
+// ─────────────────────────────────────────────
+//  GLOBALS
+// ─────────────────────────────────────────────
+let sb = null;          // supabase client
+let DB = false;         // true when supabase is live
 
-// ================================================================
-//  STATE (used in demo mode / as local cache)
-// ================================================================
-const PLANS = { free:{label:'Free',price:0}, pro:{label:'Pro',price:299}, premium:{label:'Premium',price:599} };
-
-let S = {
-  shopName:'', barberName:'', shopId:null, numBarbers:1, isOpen:true,
-  queue:[], served:0, ticketCounter:1, activeClientId:null, clientInterval:null, qrDone:false,
-  shops:[
-    {id:'sh1',name:'Kasi Cutz',owner:'Sipho Nkosi',phone:'082 111 2233',plan:'pro',status:'active',joined:'2025-11-01',lastPaid:'2026-02-01',queueCount:3,served:47},
-    {id:'sh2',name:'Sharp Fadez',owner:'Thabo Mokoena',phone:'073 444 5566',plan:'premium',status:'active',joined:'2025-12-15',lastPaid:'2026-02-15',queueCount:1,served:31},
-    {id:'sh3',name:'The Barbershop',owner:'Kagiso Dlamini',phone:'061 777 8899',plan:'free',status:'active',joined:'2026-01-10',lastPaid:null,queueCount:0,served:12},
-    {id:'sh4',name:'Fade Factory',owner:'Lerato Sithole',phone:'079 000 1122',plan:'pro',status:'suspended',joined:'2025-10-05',lastPaid:'2025-12-05',queueCount:0,served:89},
-  ],
+const PLANS = {
+  free:    { label:'Free',    price:0   },
+  pro:     { label:'Pro',     price:299 },
+  premium: { label:'Premium', price:599 },
 };
 
-// ================================================================
-//  SUPABASE DATABASE FUNCTIONS
-//  (These replace demo operations when dbMode = true)
-// ================================================================
+// Local state
+let barberShopId   = null;
+let barberShopName = '';
+let barberOpen     = true;
+let barberBarbers  = 1;
+let barberServed   = 0;
+let queue          = [];   // { id, name, position, notified, created_at }
+let ticketNum      = 1;
 
-// Called when barber launches their shop
-async function dbGetOrCreateShop(name, barberName, numBarbers) {
-  if (!dbMode) return null;
-  // Check if shop exists
-  const { data: existing } = await supabase.from('shops').select('*').eq('name', name).single();
-  if (existing) {
-    if (existing.status === 'suspended') return { suspended: true };
-    // Update barber count
-    await supabase.from('shops').update({ num_barbers: numBarbers, is_open: true }).eq('id', existing.id);
-    return existing;
-  }
-  // Create new shop
-  const { data: created } = await supabase.from('shops').insert({
-    name, barber_name: barberName, num_barbers: numBarbers,
-    is_open: true, status: 'active', plan: 'free', served: 0
-  }).select().single();
-  return created;
+let clientShopId   = null;
+let clientShopName = '';
+let clientEntryId  = null;
+let clientPollTimer = null;
+let qrBuilt        = false;
+
+// Admin local cache (demo data for offline mode)
+let adminShops = [
+  {id:'d1',name:'Kasi Cutz',barber_name:'Sipho Nkosi',phone:'082 111 2233',plan:'pro',status:'active',created_at:'2025-11-01',last_paid:'2026-02-01',served:47},
+  {id:'d2',name:'Sharp Fadez',barber_name:'Thabo Mokoena',phone:'073 444 5566',plan:'premium',status:'active',created_at:'2025-12-15',last_paid:'2026-02-15',served:31},
+  {id:'d3',name:'The Barbershop',barber_name:'Kagiso Dlamini',phone:'061 777 8899',plan:'free',status:'active',created_at:'2026-01-10',last_paid:null,served:12},
+  {id:'d4',name:'Fade Factory',barber_name:'Lerato Sithole',phone:'079 000 1122',plan:'pro',status:'suspended',created_at:'2025-10-05',last_paid:'2025-12-05',served:89},
+];
+
+let modalCb = null;
+
+// ─────────────────────────────────────────────
+//  NAVIGATION  — single function, no failures
+// ─────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
 }
 
-// Get current queue for a shop
-async function dbGetQueue(shopId) {
-  if (!dbMode) return S.queue;
-  const { data } = await supabase.from('queue_entries').select('*')
-    .eq('shop_id', shopId).eq('status', 'waiting').order('position', { ascending: true });
-  return data || [];
+function dtab(id, el) {
+  document.querySelectorAll('#pg-dash .pane').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('#pg-dash .tab').forEach(t => t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  el.classList.add('on');
 }
 
-// Client joins queue
-async function dbJoinQueue(shopId, clientName) {
-  if (!dbMode) return null;
-  const { data: shop } = await supabase.from('shops').select('*').eq('id', shopId).single();
-  if (!shop || !shop.is_open || shop.status === 'suspended') return null;
-  const position = (await dbGetQueue(shopId)).length + 1;
-  const { data } = await supabase.from('queue_entries').insert({
-    shop_id: shopId, client_name: clientName,
-    position, status: 'waiting', notified: position === 1
-  }).select().single();
-  return data;
+function atab(id, el) {
+  document.querySelectorAll('#pg-admin .pane').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('#pg-admin .tab').forEach(t => t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  el.classList.add('on');
+  if (id === 'ap-shops')   renderAdminShops();
+  if (id === 'ap-revenue') renderRevenue();
 }
 
-// Mark client as done — triggers real-time update to all clients
-async function dbMarkDone(entryId, shopId) {
-  if (!dbMode) return;
-  await supabase.from('queue_entries').update({ status: 'served' }).eq('id', entryId);
-  // Re-number remaining queue
-  const remaining = await dbGetQueue(shopId);
-  for (let i = 0; i < remaining.length; i++) {
-    const notified = i === 0;
-    await supabase.from('queue_entries').update({ position: i + 1, notified }).eq('id', remaining[i].id);
-  }
-  // Update served count
-  await supabase.from('shops').update({ served: S.served + 1 }).eq('id', shopId);
-}
-
-// Subscribe to real-time queue changes
-function dbSubscribeQueue(shopId, callback) {
-  if (!dbMode) return null;
-  return supabase.channel('queue-' + shopId)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'queue_entries', filter: `shop_id=eq.${shopId}` }, callback)
-    .subscribe();
-}
-
-// Admin: suspend/reactivate shop
-async function dbSetShopStatus(shopId, status) {
-  if (!dbMode) return;
-  await supabase.from('shops').update({ status }).eq('id', shopId);
-}
-
-// Admin: get all shops
-async function dbGetAllShops() {
-  if (!dbMode) return S.shops;
-  const { data } = await supabase.from('shops').select('*').order('created_at', { ascending: false });
-  return data || [];
-}
-
-// ================================================================
-//  NAVIGATION
-// ================================================================
-function go(id) {
+// ─────────────────────────────────────────────
+//  SUPABASE INIT
+// ─────────────────────────────────────────────
+function initDB() {
+  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return;
+  if (!window.supabase) return;
   try {
-    const target = document.getElementById(id);
-    if (!target) { console.error('Screen not found:', id); return; }
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    target.classList.add('active');
-    window.scrollTo(0,0);
-  } catch(e) { console.error('Navigation error:', e); }
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    DB = true;
+    document.getElementById('demo-warn').classList.remove('show');
+    console.log('SnipQ: Supabase connected ✓');
+  } catch(e) {
+    console.warn('Supabase init failed:', e);
+  }
 }
 
-function dTab(id, el) {
-  document.querySelectorAll('#s-dash .tp').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('#s-dash .tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active'); el.classList.add('active');
-}
+// Load Supabase library then init
+(function loadSB() {
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  s.onload  = initDB;
+  s.onerror = () => console.warn('Supabase CDN failed');
+  document.head.appendChild(s);
+})();
 
-function aTab(id, el) {
-  document.querySelectorAll('#s-admin .tp').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('#s-admin .tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active'); el.classList.add('active');
-  if (id === 'at-s') renderAdminShops();
-  if (id === 'at-r') renderRevenue();
-}
-
-// ================================================================
-//  BARBER
-// ================================================================
+// ─────────────────────────────────────────────
+//  BARBER — SETUP
+// ─────────────────────────────────────────────
 let bCount = 1;
 function adjB(d) {
   bCount = Math.max(1, Math.min(10, bCount + d));
-  document.getElementById('bc').textContent = bCount;
-  if (document.getElementById('bc2')) document.getElementById('bc2').textContent = bCount;
-  S.numBarbers = bCount; renderDash();
+  document.getElementById('cnt-b').textContent  = bCount;
+  const b2 = document.getElementById('cnt-b2');
+  if (b2) b2.textContent = bCount;
 }
 
 async function launchShop() {
-  const shop = document.getElementById('inp-shop').value.trim();
+  const name   = document.getElementById('inp-shop').value.trim();
   const barber = document.getElementById('inp-barber').value.trim();
-  if (!shop) { toast('Please enter your shop name'); return; }
+  if (!name)   { toast('Please enter your shop name'); return; }
   if (!barber) { toast('Please enter your name'); return; }
-  S.shopName = shop; S.barberName = barber; S.numBarbers = bCount;
 
-  if (dbMode) {
+  barberShopName = name;
+  barberBarbers  = bCount;
+  barberServed   = 0;
+  queue          = [];
+  qrBuilt        = false;
+
+  if (DB) {
     try {
-      const result = await dbGetOrCreateShop(shop, barber, bCount);
-      if (result?.suspended) { go('s-sus'); return; }
-      if (result) {
-        S.shopId = result.id;
-        S.queue = await dbGetQueue(result.id);
-        S.served = result.served || 0;
-        dbSubscribeQueue(result.id, async () => {
-          S.queue = await dbGetQueue(result.id);
-          renderDash();
-        });
+      // Check if shop already exists
+      const { data: existing } = await sb.from('shops')
+        .select('*').eq('name', name).maybeSingle();
+
+      if (existing) {
+        if (existing.status === 'suspended') { show('pg-suspended'); return; }
+        barberShopId = existing.id;
+        barberOpen   = existing.is_open;
+        barberServed = existing.served || 0;
+        await sb.from('shops').update({ num_barbers: bCount, is_open: true }).eq('id', existing.id);
+        // Load existing queue
+        const { data: entries } = await sb.from('queue_entries')
+          .select('*').eq('shop_id', existing.id).eq('status','waiting')
+          .order('position', { ascending: true });
+        queue = entries || [];
+      } else {
+        // Create new shop
+        const { data: created } = await sb.from('shops').insert({
+          name, barber_name: barber, num_barbers: bCount,
+          is_open: true, status: 'active', plan: 'free', served: 0
+        }).select().single();
+        barberShopId = created.id;
+        barberOpen   = true;
       }
+
+      // Subscribe to real-time queue changes
+      sb.channel('dash-' + barberShopId)
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'queue_entries',
+          filter: 'shop_id=eq.' + barberShopId
+        }, async () => {
+          const { data } = await sb.from('queue_entries')
+            .select('*').eq('shop_id', barberShopId).eq('status','waiting')
+            .order('position', { ascending: true });
+          queue = data || [];
+          renderDash();
+        }).subscribe();
+
     } catch(e) {
-      console.warn('DB error in launchShop, continuing in demo mode:', e);
+      console.warn('DB error launching shop:', e);
+      toast('DB error — continuing in demo mode');
     }
   }
 
-  document.getElementById('d-shopname').textContent = shop.toUpperCase();
-  document.getElementById('sb').textContent = bCount;
-  buildQR(); go('s-dash'); renderDash();
+  document.getElementById('dash-name').textContent = name.toUpperCase();
+  buildQR();
+  show('pg-dash');
+  renderDash();
 }
 
-function buildQR() {
-  if (S.qrDone) return;
-  const c = document.getElementById('qr-render'); c.innerHTML = '';
-  const url = `${location.origin}${location.pathname}?shop=${encodeURIComponent(S.shopName)}&join=1`;
-  new QRCode(c, { text: url, width: 196, height: 196, colorDark: '#0c0c0f', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
-  document.getElementById('qr-url').textContent = url;
-  S.qrDone = true;
-}
-
-function copyURL() {
-  navigator.clipboard.writeText(document.getElementById('qr-url').textContent).then(() => toast('✓ Link copied!'));
-}
-
+// ─────────────────────────────────────────────
+//  BARBER — DASHBOARD
+// ─────────────────────────────────────────────
 function renderDash() {
-  document.getElementById('sw').textContent = S.queue.length;
-  document.getElementById('ss').textContent = S.served;
-  document.getElementById('sb').textContent = S.numBarbers;
-  if (document.getElementById('bc2')) document.getElementById('bc2').textContent = S.numBarbers;
-  const svw = document.getElementById('svwrap');
-  if (S.queue.length > 0) { svw.style.display='block'; document.getElementById('svname').textContent = (S.queue[0].name || S.queue[0].client_name || '').toUpperCase(); }
-  else svw.style.display='none';
-  const list = document.getElementById('qlist');
-  if (S.queue.length === 0) { list.innerHTML=`<div class="empty"><div class="ei">✂️</div><div class="et">Queue is empty.<br>Share your QR to get clients in.</div></div>`; return; }
-  list.innerHTML='';
-  S.queue.forEach((c,i) => {
-    const name = c.name || c.client_name || 'Client';
-    const id = c.id;
-    const ticket = c.ticket || c.position || (i+1);
-    const el = document.createElement('div');
-    el.className = `qi ${i===0?'first':''} ${c.notified?'notif':''}`;
-    el.innerHTML = `<div class="qp">${i+1}</div><div class="qi-info"><div class="qi-name">${name}</div><div class="qi-meta">Ticket #${String(ticket).padStart(3,'0')} · ${ago(c.at||c.created_at)}</div></div><span class="badge ${i===0?'bg-green':c.notified?'bg-blue':'bg-muted'}"><span class="dot"></span>${i===0?'UP NEXT':c.notified?'NOTIFIED':'#'+(i+1)}</span><button class="dbtn" onclick="markDone('${id}')">Done ✓</button>`;
-    list.appendChild(el);
+  document.getElementById('st-waiting').textContent = queue.length;
+  document.getElementById('st-served').textContent  = barberServed;
+  document.getElementById('st-barbers').textContent = barberBarbers;
+  const b2 = document.getElementById('cnt-b2');
+  if (b2) b2.textContent = barberBarbers;
+
+  const svWrap = document.getElementById('serving-wrap');
+  if (queue.length > 0) {
+    svWrap.style.display = 'block';
+    document.getElementById('serving-name').textContent =
+      (queue[0].name || queue[0].client_name || '').toUpperCase();
+  } else {
+    svWrap.style.display = 'none';
+  }
+
+  const list = document.getElementById('q-list');
+  if (queue.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">✂️</div><div class="empty-text">Queue empty.<br>Share your QR to get clients in.</div></div>';
+    return;
+  }
+  list.innerHTML = '';
+  queue.forEach((c, i) => {
+    const name   = c.name || c.client_name || 'Client';
+    const ticket = c.ticket || c.position || (i + 1);
+    const div    = document.createElement('div');
+    div.className = 'q-item' + (i === 0 ? ' q-first' : '');
+    div.innerHTML =
+      '<div class="q-num">' + (i + 1) + '</div>' +
+      '<div class="q-info">' +
+        '<div class="q-name">' + esc(name) + '</div>' +
+        '<div class="q-meta">Ticket #' + String(ticket).padStart(3,'0') + ' · ' + timeAgo(c.created_at || c.at) + '</div>' +
+      '</div>' +
+      '<span class="badge ' + (i === 0 ? 'bg-g' : 'bg-m') + '">' +
+        '<span class="dot"></span>' + (i === 0 ? 'UP NEXT' : '#' + (i + 1)) +
+      '</span>' +
+      '<button class="done-btn" onclick="markDone(\'' + c.id + '\')">Done ✓</button>';
+    list.appendChild(div);
   });
 }
 
 async function markDone(id) {
-  const idx = S.queue.findIndex(c => c.id === id);
+  const idx = queue.findIndex(c => c.id === id);
   if (idx < 0) return;
-  const name = S.queue[idx].name || S.queue[idx].client_name;
-  if (dbMode) await dbMarkDone(id, S.shopId);
-  S.queue.splice(idx, 1); S.served++;
-  if (S.queue.length > 0 && !S.queue[0].notified) { S.queue[0].notified=true; toast(`🔔 ${S.queue[0].name||S.queue[0].client_name} notified — they're up!`); }
-  toast(`✓ ${name} served`); renderDash(); renderClient();
+  const name = queue[idx].name || queue[idx].client_name;
+
+  if (DB && barberShopId) {
+    await sb.from('queue_entries').update({ status: 'served' }).eq('id', id);
+    // Renumber remaining
+    const rest = queue.filter((_, i) => i !== idx);
+    for (let i = 0; i < rest.length; i++) {
+      await sb.from('queue_entries').update({ position: i + 1, notified: i === 0 }).eq('id', rest[i].id);
+    }
+    await sb.from('shops').update({ served: barberServed + 1 }).eq('id', barberShopId);
+    // Queue will refresh via realtime subscription
+  } else {
+    queue.splice(idx, 1);
+  }
+
+  barberServed++;
+  toast('✓ ' + name + ' served');
+  renderDash();
 }
 
-function clearQ() {
-  showModal('Clear Queue','Remove all clients from the queue?','btn-red','🗑 Clear', async () => {
-    if (dbMode && S.shopId) await supabase.from('queue_entries').update({status:'removed'}).eq('shop_id',S.shopId).eq('status','waiting');
-    S.queue=[]; S.served=0; renderDash(); toast('Queue cleared'); closeModal();
-  });
+function buildQR() {
+  if (qrBuilt) return;
+  const wrap = document.getElementById('qr-canvas');
+  wrap.innerHTML = '';
+  const url = location.origin + location.pathname + '?shop=' + encodeURIComponent(barberShopName) + '&join=1';
+  new QRCode(wrap, { text: url, width: 180, height: 180, colorDark: '#0c0c0f', colorLight: '#ffffff' });
+  document.getElementById('qr-url-text').textContent = url;
+  qrBuilt = true;
+}
+
+function copyURL() {
+  navigator.clipboard.writeText(document.getElementById('qr-url-text').textContent)
+    .then(() => toast('✓ Link copied!'));
 }
 
 async function toggleOpen() {
-  S.isOpen = !S.isOpen;
-  if (dbMode && S.shopId) await supabase.from('shops').update({is_open:S.isOpen}).eq('id',S.shopId);
-  const pill = document.getElementById('open-pill');
-  pill.className = `pill ${S.isOpen?'on':''}`;
-  toast(S.isOpen ? '✓ Queue is open' : '⚠️ Queue closed to new clients');
+  barberOpen = !barberOpen;
+  if (DB && barberShopId) await sb.from('shops').update({ is_open: barberOpen }).eq('id', barberShopId);
+  document.getElementById('open-pill').className = 'pill' + (barberOpen ? ' on' : '');
+  toast(barberOpen ? '✓ Queue is open' : '⚠️ Queue closed');
 }
 
-// ================================================================
-//  CLIENT
-// ================================================================
-function clientEntryFlow() {
-  if (!S.shopName) {
-    go('s-shop-search');
-    return;
-  }
-  loadJoinScreen();
+function clearQueue() {
+  modal('Clear Queue', 'Remove all clients from the queue?', 'b-red', '🗑 Clear', async () => {
+    if (DB && barberShopId) {
+      await sb.from('queue_entries').update({ status: 'removed' })
+        .eq('shop_id', barberShopId).eq('status', 'waiting');
+    }
+    queue = []; barberServed = 0;
+    renderDash(); closeModal(); toast('Queue cleared');
+  });
 }
 
+function doReset() {
+  modal('Reset', 'Reset everything and start fresh?', 'b-red', 'Reset', () => {
+    queue = []; barberServed = 0; qrBuilt = false; barberShopId = null;
+    document.getElementById('qr-canvas').innerHTML = '';
+    renderDash(); closeModal(); show('pg-setup');
+  });
+}
+
+// ─────────────────────────────────────────────
+//  CLIENT — SEARCH
+// ─────────────────────────────────────────────
 async function searchShop() {
-  const name = document.getElementById('inp-search-shop').value.trim();
-  if (!name) { toast('Please enter a shop name'); return; }
-  const res = document.getElementById('search-result');
-  res.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px;">Searching...</div>';
+  const term = document.getElementById('inp-search').value.trim();
+  if (!term) { toast('Please enter a shop name'); return; }
+  const results = document.getElementById('search-results');
+  results.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px;text-align:center">Searching…</div>';
 
-  if (dbMode) {
+  if (DB) {
     try {
-      const { data: shops } = await supabase.from('shops')
-        .select('*').ilike('name', '%' + name + '%').eq('status', 'active');
+      const { data: shops } = await sb.from('shops')
+        .select('*').ilike('name', '%' + term + '%');
       if (!shops || shops.length === 0) {
-        res.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:12px;">No shop found with that name.</div>';
+        results.innerHTML = '<div style="font-size:13px;color:var(--red);padding:12px;text-align:center">No shop found with that name.</div>';
         return;
       }
-      res.innerHTML = '';
+      results.innerHTML = '';
       shops.forEach(shop => {
         const d = document.createElement('div');
-        d.className = 'card';
-        d.style.cssText = 'margin-bottom:10px;cursor:pointer;border-color:var(--border);transition:border-color .2s;';
-        d.onmouseover = () => d.style.borderColor = 'var(--gold)';
-        d.onmouseout = () => d.style.borderColor = 'var(--border)';
-        d.innerHTML = '<div style="font-weight:700;font-size:15px;margin-bottom:4px;">' + shop.name + '</div>' +
-          '<div style="font-size:11px;color:var(--muted);font-family:Space Mono,monospace;">' +
-          (shop.is_open ? '<span style="color:var(--green)">● OPEN</span>' : '<span style="color:var(--red)">● CLOSED</span>') +
+        d.className = 'shop-result';
+        d.innerHTML =
+          '<div style="font-weight:700;font-size:15px;margin-bottom:4px">' + esc(shop.name) + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);font-family:\'Space Mono\',monospace">' +
+          (shop.status === 'suspended'
+            ? '<span style="color:var(--red)">● SUSPENDED</span>'
+            : shop.is_open
+              ? '<span style="color:var(--green)">● OPEN</span>'
+              : '<span style="color:var(--amber)">● CLOSED</span>') +
           ' · ' + (shop.num_barbers || 1) + ' barber(s)</div>';
-        d.onclick = () => {
-          S.shopName = shop.name;
-          S.shopId = shop.id;
-          S.isOpen = shop.is_open;
-          document.getElementById('inp-search-shop').value = '';
-          res.innerHTML = '';
-          loadJoinScreen();
-        };
-        res.appendChild(d);
+        d.onclick = () => openJoinScreen(shop);
+        results.appendChild(d);
       });
     } catch(e) {
-      res.innerHTML = '<div style="font-size:13px;color:var(--red);padding:12px;">Error searching. Try again.</div>';
+      results.innerHTML = '<div style="font-size:13px;color:var(--red);padding:12px">Error — try again.</div>';
     }
   } else {
-    // Demo mode — search local shops list
-    const found = S.shops.filter(s => s.name.toLowerCase().includes(name.toLowerCase()) && s.status === 'active');
+    // Demo mode
+    const found = adminShops.filter(s => s.name.toLowerCase().includes(term.toLowerCase()));
     if (!found.length) {
-      res.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:12px;">No shop found. (Demo mode — no real shops yet)</div>';
+      results.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px;text-align:center">No shop found. (Demo mode)</div>';
       return;
     }
-    res.innerHTML = '';
+    results.innerHTML = '';
     found.forEach(shop => {
       const d = document.createElement('div');
-      d.className = 'card';
-      d.style.cssText = 'margin-bottom:10px;cursor:pointer;';
-      d.innerHTML = '<div style="font-weight:700;font-size:15px;">' + shop.name + '</div>';
-      d.onclick = () => {
-        S.shopName = shop.name;
-        S.isOpen = true;
-        res.innerHTML = '';
-        loadJoinScreen();
-      };
-      res.appendChild(d);
+      d.className = 'shop-result';
+      d.innerHTML = '<div style="font-weight:700;font-size:15px">' + esc(shop.name) + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);font-family:\'Space Mono\',monospace">Demo shop</div>';
+      d.onclick = () => openJoinScreen({ ...shop, is_open: true });
+      results.appendChild(d);
     });
   }
 }
 
-async function loadJoinScreen() {
-  if (dbMode && S.shopName && !S.shopId) {
+// ─────────────────────────────────────────────
+//  CLIENT — JOIN
+// ─────────────────────────────────────────────
+async function openJoinScreen(shop) {
+  if (shop.status === 'suspended') { show('pg-suspended'); return; }
+  clientShopId   = shop.id;
+  clientShopName = shop.name;
+
+  // Refresh queue count from DB
+  let qCount = 0;
+  if (DB && shop.id) {
     try {
-      const { data: shop } = await supabase.from('shops').select('*').eq('name', S.shopName).single();
-      if (shop) {
-        if (shop.status === 'suspended') { go('s-sus'); return; }
-        S.shopId = shop.id;
-        S.isOpen = shop.is_open;
-        S.queue = await dbGetQueue(shop.id);
-      }
-    } catch(e) { console.warn('Shop lookup failed:', e); }
-  } else if (dbMode && S.shopId) {
-    try {
-      const { data: shop } = await supabase.from('shops').select('*').eq('id', S.shopId).single();
-      if (shop) {
-        if (shop.status === 'suspended') { go('s-sus'); return; }
-        S.isOpen = shop.is_open;
-        S.queue = await dbGetQueue(shop.id);
-      }
-    } catch(e) { console.warn('Shop lookup failed:', e); }
-  } else if (!dbMode) {
-    const sus = S.shops.find(s => s.name.toLowerCase() === S.shopName.toLowerCase() && s.status === 'suspended');
-    if (sus) { go('s-sus'); return; }
+      const { data } = await sb.from('queue_entries')
+        .select('id').eq('shop_id', shop.id).eq('status', 'waiting');
+      qCount = (data || []).length;
+    } catch(e) {}
   }
-  document.getElementById('j-shopname').textContent = S.shopName;
-  const n = S.queue.length;
-  document.getElementById('j-count').textContent = n;
-  document.getElementById('j-lbl').textContent = n===1?'person in queue':'people in queue';
-  document.getElementById('j-sub').textContent = n===0?"You'll be first!":'You'll be next after them';
-  document.getElementById('j-closed').style.display = S.isOpen?'none':'block';
-  const btn = document.getElementById('jbtn'); btn.disabled=!S.isOpen; btn.style.opacity=S.isOpen?'1':'0.4';
-  go('s-join');
+
+  document.getElementById('join-shop-name').textContent = shop.name;
+  document.getElementById('join-q-count').textContent   = qCount;
+  document.getElementById('join-q-label').textContent   = qCount === 1 ? 'person in queue' : 'people in queue';
+  document.getElementById('join-q-sub').textContent     = qCount === 0 ? "You'll be first!" : "You'll be next after them";
+  document.getElementById('join-closed-msg').style.display = shop.is_open ? 'none' : 'block';
+  document.getElementById('join-btn').disabled   = !shop.is_open;
+  document.getElementById('join-btn').style.opacity = shop.is_open ? '1' : '0.4';
+  document.getElementById('inp-client-name').value = '';
+  show('pg-join');
 }
 
-async function joinQ() {
-  if (!S.isOpen) { toast('Shop not accepting clients right now'); return; }
-  const name = document.getElementById('inp-client').value.trim();
+async function joinQueue() {
+  const name = document.getElementById('inp-client-name').value.trim();
   if (!name) { toast('Please enter your name'); return; }
-  let c;
-  if (dbMode && S.shopId) {
+
+  let entry;
+
+  if (DB && clientShopId) {
     try {
-      c = await dbJoinQueue(S.shopId, name);
-      if (!c) { toast('Could not join — shop may be closed'); return; }
-      c.name = c.client_name;
+      // Check shop is still open
+      const { data: shop } = await sb.from('shops').select('*').eq('id', clientShopId).single();
+      if (!shop || shop.status === 'suspended') { show('pg-suspended'); return; }
+      if (!shop.is_open) { toast('Shop is no longer accepting clients'); return; }
+
+      const { data: existing } = await sb.from('queue_entries')
+        .select('id').eq('shop_id', clientShopId).eq('status', 'waiting');
+      const position = (existing || []).length + 1;
+
+      const { data: created } = await sb.from('queue_entries').insert({
+        shop_id: clientShopId, client_name: name,
+        position, status: 'waiting', notified: position === 1
+      }).select().single();
+      entry = { id: created.id, name: created.client_name, position: created.position };
     } catch(e) {
-      console.warn('DB error in joinQ, falling back to demo:', e);
-      c = null;
+      console.warn('Join queue DB error:', e);
+      toast('Error joining queue — try again');
+      return;
     }
-  }
-  if (!c) {
-    // Demo mode fallback
-    c = { id:'c'+Date.now(), name, ticket:S.ticketCounter++, at:new Date(), notified:false };
-    S.queue.push(c);
-    if (S.queue.length===1) S.queue[0].notified=true;
-  }
-  S.activeClientId = c.id;
-  renderDash();
-  document.getElementById('inp-client').value='';
-  document.getElementById('cv-shop').textContent = S.shopName.toUpperCase();
-  document.getElementById('tv-name').textContent = name;
-  document.getElementById('tv-ticket').textContent = '#'+String(c.ticket||c.position||1).padStart(3,'0');
-  document.getElementById('tv-shop').textContent = S.shopName;
-
-  if (dbMode && S.shopId) {
-    try {
-      dbSubscribeQueue(S.shopId, async () => {
-        S.queue = await dbGetQueue(S.shopId);
-        renderClient();
-      });
-    } catch(e) { console.warn('Subscription error:', e); }
-  }
-
-  go('s-client'); renderClient();
-  if (S.clientInterval) clearInterval(S.clientInterval);
-  S.clientInterval = setInterval(renderClient, 1500);
-}
-
-function renderClient() {
-  const id = S.activeClientId; if (!id) return;
-  const idx = S.queue.findIndex(c => c.id===id); if (idx<0) return;
-  const pos = idx+1;
-  const pe = document.getElementById('cv-pos');
-  pe.textContent = pos;
-  if (pos===1) {
-    pe.className='bignum bgreen';
-    document.getElementById('cv-status').textContent="You're up next!";
-    document.getElementById('cv-ahead').textContent='';
-    document.getElementById('cv-alert').style.display='block';
-    if (navigator.vibrate) navigator.vibrate([200,100,200]);
   } else {
-    pe.className='bignum bgold';
-    document.getElementById('cv-status').textContent='Waiting in queue';
-    document.getElementById('cv-ahead').textContent=`${pos-1} ${pos-1===1?'person':'people'} ahead of you`;
-    document.getElementById('cv-alert').style.display='none';
+    // Demo mode
+    entry = { id: 'c' + Date.now(), name, position: queue.length + 1 };
+    queue.push({ ...entry, client_name: name, status: 'waiting', notified: queue.length === 0 });
+  }
+
+  clientEntryId = entry.id;
+
+  document.getElementById('client-shop-name').textContent = clientShopName.toUpperCase();
+  document.getElementById('tkt-name').textContent  = name;
+  document.getElementById('tkt-num').textContent   = '#' + String(entry.position).padStart(3, '0');
+  document.getElementById('tkt-shop').textContent  = clientShopName;
+
+  show('pg-client');
+
+  // Subscribe to real-time position updates
+  if (DB && clientShopId) {
+    sb.channel('client-' + clientEntryId)
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'queue_entries',
+        filter: 'shop_id=eq.' + clientShopId
+      }, () => refreshClientPos())
+      .subscribe();
+  }
+
+  refreshClientPos();
+  if (clientPollTimer) clearInterval(clientPollTimer);
+  clientPollTimer = setInterval(refreshClientPos, 2000);
+}
+
+async function refreshClientPos() {
+  if (!clientEntryId) return;
+  let pos = 0;
+
+  if (DB && clientShopId) {
+    try {
+      const { data: myEntry } = await sb.from('queue_entries')
+        .select('position,status').eq('id', clientEntryId).single();
+      if (!myEntry || myEntry.status !== 'waiting') {
+        // Removed from queue by barber
+        clearInterval(clientPollTimer);
+        return;
+      }
+      pos = myEntry.position;
+    } catch(e) { return; }
+  } else {
+    const idx = queue.findIndex(c => c.id === clientEntryId);
+    if (idx < 0) return;
+    pos = idx + 1;
+  }
+
+  document.getElementById('client-pos').textContent = pos;
+
+  if (pos === 1) {
+    document.getElementById('client-pos').className    = 'bignum c-green';
+    document.getElementById('client-status').textContent = "You're up next!";
+    document.getElementById('client-ahead').textContent  = '';
+    document.getElementById('next-alert').style.display  = 'block';
+    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  } else {
+    document.getElementById('client-pos').className    = 'bignum c-gold';
+    document.getElementById('client-status').textContent = 'Waiting in queue';
+    document.getElementById('client-ahead').textContent  = (pos - 1) + ' ' + (pos - 1 === 1 ? 'person' : 'people') + ' ahead of you';
+    document.getElementById('next-alert').style.display  = 'none';
   }
 }
 
-function leaveQ() {
-  showModal('Leave Queue','Leave the queue?','btn-red','Leave', async () => {
-    clearInterval(S.clientInterval);
-    const idx = S.queue.findIndex(c=>c.id===S.activeClientId);
-    if (idx>-1) {
-      if (dbMode) await supabase.from('queue_entries').update({status:'left'}).eq('id',S.activeClientId);
-      S.queue.splice(idx,1);
+function leaveQueue() {
+  modal('Leave Queue', 'Leave the queue?', 'b-red', 'Leave', async () => {
+    clearInterval(clientPollTimer);
+    if (DB && clientEntryId) {
+      await sb.from('queue_entries').update({ status: 'left' }).eq('id', clientEntryId);
+    } else {
+      const idx = queue.findIndex(c => c.id === clientEntryId);
+      if (idx > -1) queue.splice(idx, 1);
     }
-    S.activeClientId=null; renderDash(); closeModal(); go('s-landing');
+    clientEntryId = null;
+    closeModal();
+    show('pg-land');
   });
 }
 
-// ================================================================
+// ─────────────────────────────────────────────
 //  ADMIN
-// ================================================================
-async function adminLogin() {
-  if (document.getElementById('apw').value !== ADMIN_PASSWORD) { toast('❌ Incorrect password'); return; }
-  document.getElementById('apw').value='';
-  try {
-    await renderAdminShops();
-    renderRevenue();
-  } catch(e) {
-    console.warn('Admin load error:', e);
-    renderRevenue();
+// ─────────────────────────────────────────────
+function adminLogin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw !== ADMIN_PASSWORD) { toast('❌ Wrong password'); return; }
+  document.getElementById('admin-pw').value = '';
+  renderAdminShops();
+  renderRevenue();
+  show('pg-admin');
+}
+
+async function loadAdminShops() {
+  if (DB) {
+    const { data } = await sb.from('shops').select('*').order('created_at', { ascending: false });
+    adminShops = data || [];
   }
-  go('s-admin');
 }
 
 async function renderAdminShops() {
-  const shops = dbMode ? await dbGetAllShops() : S.shops;
-  if (dbMode) S.shops = shops;
-  const total=shops.length, active=shops.filter(s=>s.status==='active').length,
-    suspended=shops.filter(s=>s.status==='suspended').length,
-    paying=shops.filter(s=>s.plan!=='free'&&s.status==='active').length;
-  document.getElementById('a-stats').innerHTML=`
-    <div class="ast"><div class="asn" style="color:var(--gold)">${total}</div><div class="asl">Total Shops</div></div>
-    <div class="ast"><div class="asn" style="color:var(--green)">${active}</div><div class="asl">Active</div></div>
-    <div class="ast"><div class="asn" style="color:var(--red)">${suspended}</div><div class="asl">Suspended</div></div>
-    <div class="ast"><div class="asn" style="color:var(--blue)">${paying}</div><div class="asl">Paying</div></div>`;
-  const tbl = document.getElementById('a-shops');
-  if (!shops.length) { tbl.innerHTML=`<div class="empty"><div class="ei">🏪</div><div class="et">No shops registered yet.</div></div>`; return; }
-  tbl.innerHTML='';
-  shops.forEach((shop,i) => {
-    const sus=shop.status==='suspended', overdue=isOverdue(shop), plan=PLANS[shop.plan]||PLANS.free;
-    const d=document.createElement('div'); d.className=`shop-row ${sus?'sus':''}`; d.style.animationDelay=(i*.05)+'s';
-    d.innerHTML=`
-      <div class="sr-top">
-        <div><div class="sr-name">${shop.name} <span class="pb ${shop.plan==='free'?'pf':shop.plan==='pro'?'pp':'px'}">${plan.label}</span></div><div class="sr-meta">${shop.owner||shop.barber_name||'—'} · ${shop.phone||'—'}</div></div>
-        <div class="sr-acts">
-          ${sus?`<button class="btn btn-green btn-sm" onclick="reactivate('${shop.id}')">✓ Reactivate</button>`:`<button class="btn btn-red btn-sm" onclick="suspend('${shop.id}')">🔒 Suspend</button>`}
-          <button class="btn btn-amber btn-sm" onclick="cycPlan('${shop.id}')">Plan ↕</button>
-          <button class="btn btn-ghost btn-sm" onclick="delShop('${shop.id}')">✕</button>
-        </div>
-      </div>
-      <div class="sr-bot">
-        <span class="badge ${sus?'bg-red':overdue?'bg-amber':'bg-green'}"><span class="dot"></span>${sus?'SUSPENDED':overdue?'OVERDUE':'ACTIVE'}</span>
-        <div class="sd">Joined <span>${shop.joined||shop.created_at?.split('T')[0]||'—'}</span></div>
-        <div class="sd">Last paid <span>${shop.lastPaid||shop.last_paid||'Never'}</span></div>
-        <div class="sd">Queue <span>${shop.queueCount||shop.queue_count||0}</span></div>
-        <div class="sd">Served <span>${shop.served||0}</span></div>
-      </div>`;
-    tbl.appendChild(d);
+  await loadAdminShops();
+  const total     = adminShops.length;
+  const active    = adminShops.filter(s => s.status === 'active').length;
+  const suspended = adminShops.filter(s => s.status === 'suspended').length;
+  const paying    = adminShops.filter(s => s.plan !== 'free' && s.status === 'active').length;
+
+  document.getElementById('admin-stat-grid').innerHTML =
+    statBox(total,     'Total',     'var(--gold)')  +
+    statBox(active,    'Active',    'var(--green)')  +
+    statBox(suspended, 'Suspended', 'var(--red)')    +
+    statBox(paying,    'Paying',    'var(--blue)');
+
+  const list = document.getElementById('admin-shop-list');
+  if (!adminShops.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🏪</div><div class="empty-text">No shops registered yet.</div></div>';
+    return;
+  }
+  list.innerHTML = '';
+  adminShops.forEach(shop => {
+    const sus     = shop.status === 'suspended';
+    const overdue = isOverdue(shop);
+    const plan    = PLANS[shop.plan] || PLANS.free;
+    const div     = document.createElement('div');
+    div.className = 'shop-row' + (sus ? ' sus' : '');
+    div.innerHTML =
+      '<div class="sr-top">' +
+        '<div>' +
+          '<div class="sr-name">' + esc(shop.name) +
+            ' <span class="plan-tag pt-' + (shop.plan||'free') + '">' + plan.label + '</span>' +
+          '</div>' +
+          '<div class="sr-meta">' + esc(shop.barber_name||'—') + ' · ' + esc(shop.phone||'—') + '</div>' +
+        '</div>' +
+        '<div class="sr-btns">' +
+          (sus
+            ? '<button class="btn b-green b-sm" onclick="reactivateShop(\'' + shop.id + '\')">✓ Reactivate</button>'
+            : '<button class="btn b-red b-sm" onclick="suspendShop(\'' + shop.id + '\')">🔒 Suspend</button>') +
+          '<button class="btn b-amber b-sm" onclick="cyclePlan(\'' + shop.id + '\')">Plan ↕</button>' +
+          '<button class="btn b-ghost b-sm" onclick="deleteShop(\'' + shop.id + '\')">✕</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sr-bot">' +
+        '<span class="badge ' + (sus ? 'bg-r' : overdue ? 'bg-a' : 'bg-g') + '">' +
+          '<span class="dot"></span>' + (sus ? 'SUSPENDED' : overdue ? 'OVERDUE' : 'ACTIVE') +
+        '</span>' +
+        '<div class="sr-detail">Joined <span>' + (shop.created_at||'').split('T')[0] + '</span></div>' +
+        '<div class="sr-detail">Last paid <span>' + (shop.last_paid || 'Never') + '</span></div>' +
+        '<div class="sr-detail">Served <span>' + (shop.served || 0) + '</span></div>' +
+      '</div>';
+    list.appendChild(div);
   });
+}
+
+function statBox(n, label, color) {
+  return '<div class="a-stat"><div class="a-sn" style="color:' + color + '">' + n + '</div><div class="a-sl">' + label + '</div></div>';
 }
 
 function isOverdue(shop) {
-  if (!shop.plan||shop.plan==='free') return false;
-  const last = new Date(shop.lastPaid||shop.last_paid);
-  if (isNaN(last)) return false;
-  return (new Date()-last)/(1000*60*60*24) > 35;
+  if (!shop.last_paid || shop.plan === 'free') return false;
+  return (new Date() - new Date(shop.last_paid)) / 86400000 > 35;
 }
 
-async function suspend(id) {
-  const shop = S.shops.find(s=>s.id===id);
-  showModal('🔒 Suspend Shop',`Suspend "${shop.name}"? Their QR will immediately show "Shop Unavailable" to all clients.`,'btn-red','🔒 Suspend', async () => {
-    if (dbMode) await dbSetShopStatus(id,'suspended');
-    shop.status='suspended'; renderAdminShops(); renderRevenue(); toast(`🔒 ${shop.name} suspended`); closeModal();
-  });
+async function suspendShop(id) {
+  const shop = adminShops.find(s => s.id === id);
+  modal('🔒 Suspend Shop',
+    'Suspend "' + shop.name + '"? Their QR will immediately show "Shop Unavailable" to all clients.',
+    'b-red', '🔒 Suspend',
+    async () => {
+      if (DB) await sb.from('shops').update({ status: 'suspended' }).eq('id', id);
+      shop.status = 'suspended';
+      renderAdminShops(); renderRevenue();
+      toast('🔒 ' + shop.name + ' suspended');
+      closeModal();
+    });
 }
 
-async function reactivate(id) {
-  const shop = S.shops.find(s=>s.id===id);
-  showModal('✓ Reactivate',`Reactivate "${shop.name}"? Their queue will go live immediately.`,'btn-green','✓ Reactivate', async () => {
-    if (dbMode) await dbSetShopStatus(id,'active');
-    shop.status='active'; shop.lastPaid=new Date().toISOString().split('T')[0];
-    renderAdminShops(); renderRevenue(); toast(`✓ ${shop.name} reactivated`); closeModal();
-  });
+async function reactivateShop(id) {
+  const shop = adminShops.find(s => s.id === id);
+  modal('✓ Reactivate', 'Reactivate "' + shop.name + '"? Their queue goes live immediately.', 'b-green', '✓ Reactivate',
+    async () => {
+      const today = new Date().toISOString().split('T')[0];
+      if (DB) await sb.from('shops').update({ status: 'active', last_paid: today }).eq('id', id);
+      shop.status = 'active'; shop.last_paid = today;
+      renderAdminShops(); renderRevenue();
+      toast('✓ ' + shop.name + ' reactivated');
+      closeModal();
+    });
 }
 
-function cycPlan(id) {
-  const shop=S.shops.find(s=>s.id===id), plans=['free','pro','premium'];
-  const next=plans[(plans.indexOf(shop.plan)+1)%3];
-  showModal('Change Plan',`Change "${shop.name}" to ${PLANS[next].label} (R${PLANS[next].price}/mo)?`,'btn-amber','Change', async () => {
-    if (dbMode) await supabase.from('shops').update({plan:next}).eq('id',id);
-    shop.plan=next; renderAdminShops(); renderRevenue(); toast(`Plan → ${PLANS[next].label}`); closeModal();
-  });
+function cyclePlan(id) {
+  const shop = adminShops.find(s => s.id === id);
+  const order = ['free','pro','premium'];
+  const next  = order[(order.indexOf(shop.plan) + 1) % 3];
+  modal('Change Plan',
+    'Change "' + shop.name + '" to ' + PLANS[next].label + ' (R' + PLANS[next].price + '/mo)?',
+    'b-amber', 'Change Plan',
+    async () => {
+      if (DB) await sb.from('shops').update({ plan: next }).eq('id', id);
+      shop.plan = next;
+      renderAdminShops(); renderRevenue();
+      toast('Plan → ' + PLANS[next].label);
+      closeModal();
+    });
 }
 
-function delShop(id) {
-  const shop=S.shops.find(s=>s.id===id);
-  showModal('✕ Remove',`Permanently remove "${shop.name}"? Cannot be undone.`,'btn-red','✕ Remove', async () => {
-    if (dbMode) await supabase.from('shops').delete().eq('id',id);
-    S.shops=S.shops.filter(s=>s.id!==id); renderAdminShops(); renderRevenue(); toast(`${shop.name} removed`); closeModal();
-  });
+function deleteShop(id) {
+  const shop = adminShops.find(s => s.id === id);
+  modal('✕ Remove', 'Permanently remove "' + shop.name + '"? Cannot be undone.', 'b-red', '✕ Remove',
+    async () => {
+      if (DB) await sb.from('shops').delete().eq('id', id);
+      adminShops = adminShops.filter(s => s.id !== id);
+      renderAdminShops(); renderRevenue();
+      toast(shop.name + ' removed');
+      closeModal();
+    });
 }
 
 async function addShop() {
-  const n=document.getElementById('as-n').value.trim(), o=document.getElementById('as-o').value.trim(),
-    p=document.getElementById('as-p').value.trim(), pl=document.getElementById('as-pl').value;
-  if (!n||!o) { toast('Please fill shop name and owner'); return; }
-  const today=new Date().toISOString().split('T')[0];
-  const shop = { id:'sh'+Date.now(), name:n, owner:o, phone:p, plan:pl, status:'active', joined:today, lastPaid:pl!=='free'?today:null, queueCount:0, served:0 };
-  if (dbMode) {
-    const { data } = await supabase.from('shops').insert({ name:n, barber_name:o, phone:p, plan:pl, status:'active', last_paid:pl!=='free'?today:null, served:0 }).select().single();
-    if (data) shop.id = data.id;
+  const name  = document.getElementById('new-shop-name').value.trim();
+  const owner = document.getElementById('new-shop-owner').value.trim();
+  const phone = document.getElementById('new-shop-phone').value.trim();
+  const plan  = document.getElementById('new-shop-plan').value;
+  if (!name || !owner) { toast('Please fill in shop name and owner'); return; }
+  const today = new Date().toISOString().split('T')[0];
+  let id = 'local-' + Date.now();
+  if (DB) {
+    const { data } = await sb.from('shops').insert({
+      name, barber_name: owner, phone, plan, status: 'active',
+      last_paid: plan !== 'free' ? today : null, served: 0
+    }).select().single();
+    if (data) id = data.id;
   }
-  S.shops.push(shop);
-  ['as-n','as-o','as-p'].forEach(id=>document.getElementById(id).value='');
-  renderAdminShops(); renderRevenue(); toast(`✓ ${n} registered!`);
-  aTab('at-s', document.querySelectorAll('#s-admin .tab')[0]);
+  adminShops.unshift({ id, name, barber_name: owner, phone, plan, status: 'active', created_at: today, last_paid: plan !== 'free' ? today : null, served: 0 });
+  ['new-shop-name','new-shop-owner','new-shop-phone'].forEach(i => document.getElementById(i).value = '');
+  toast('✓ ' + name + ' registered!');
+  atab('ap-shops', document.querySelector('#pg-admin .tabbar .tab'));
 }
 
 function renderRevenue() {
-  const paying=S.shops.filter(s=>s.status==='active'&&s.plan!=='free');
-  const mrr=paying.reduce((sum,s)=>sum+(PLANS[s.plan]?.price||0),0);
-  document.getElementById('r-mrr').textContent=`R ${mrr.toLocaleString()}`;
-  document.getElementById('r-sub').textContent=`from ${paying.length} paying shop${paying.length!==1?'s':''}`;
-  const rt=document.getElementById('r-table'); rt.innerHTML='';
-  const sorted=[...S.shops].filter(s=>s.plan!=='free').sort((a,b)=>(PLANS[b.plan]?.price||0)-(PLANS[a.plan]?.price||0));
-  const free=S.shops.filter(s=>s.plan==='free');
-  if (sorted.length) {
-    const h=document.createElement('div'); h.className='slbl'; h.textContent='Paying Shops'; rt.appendChild(h);
-    sorted.forEach(shop=>{
-      const d=document.createElement('div'); d.className='card'; d.style.marginBottom='8px';
-      d.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><div><div style="font-weight:700;font-size:14px;">${shop.name} <span class="pb ${shop.plan==='pro'?'pp':'px'}">${PLANS[shop.plan].label}</span></div><div style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;">${shop.owner||shop.barber_name||'—'}</div></div><div style="text-align:right;"><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:${shop.status==='suspended'?'var(--red)':'var(--gold)'};">R ${PLANS[shop.plan].price}/mo</div><span class="badge ${shop.status==='suspended'?'bg-red':'bg-green'}">${shop.status==='suspended'?'SUSPENDED':'ACTIVE'}</span></div></div>`;
-      rt.appendChild(d);
+  const paying = adminShops.filter(s => s.status === 'active' && s.plan !== 'free');
+  const mrr    = paying.reduce((sum, s) => sum + (PLANS[s.plan]?.price || 0), 0);
+  document.getElementById('rev-mrr').textContent = 'R ' + mrr.toLocaleString();
+  document.getElementById('rev-sub').textContent  = 'from ' + paying.length + ' paying shop' + (paying.length !== 1 ? 's' : '');
+  const list = document.getElementById('rev-list');
+  list.innerHTML = '';
+  const payingSorted = [...adminShops].filter(s => s.plan !== 'free').sort((a,b) => (PLANS[b.plan]?.price||0) - (PLANS[a.plan]?.price||0));
+  const freeShops    = adminShops.filter(s => s.plan === 'free');
+  if (payingSorted.length) {
+    const h = document.createElement('div'); h.className = 'sec'; h.textContent = 'Paying Shops'; list.appendChild(h);
+    payingSorted.forEach(s => {
+      const d = document.createElement('div'); d.className = 'card'; d.style.marginBottom = '8px';
+      d.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
+        '<div><div style="font-weight:700;font-size:14px">' + esc(s.name) + ' <span class="plan-tag pt-' + s.plan + '">' + (PLANS[s.plan]?.label||'') + '</span></div>' +
+        '<div style="font-size:11px;color:var(--muted);font-family:\'Space Mono\',monospace;margin-top:2px">' + esc(s.barber_name||'—') + '</div></div>' +
+        '<div style="text-align:right"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;color:' + (s.status==='suspended'?'var(--red)':'var(--gold)') + '">R ' + (PLANS[s.plan]?.price||0) + '/mo</div>' +
+        '<span class="badge ' + (s.status==='suspended'?'bg-r':'bg-g') + '">' + (s.status==='suspended'?'SUSPENDED':'ACTIVE') + '</span></div></div>';
+      list.appendChild(d);
     });
   }
-  if (free.length) {
-    const h2=document.createElement('div'); h2.className='slbl'; h2.style.marginTop='20px'; h2.textContent='Free (Upgrade Targets)'; rt.appendChild(h2);
-    free.forEach(shop=>{
-      const d=document.createElement('div'); d.className='card'; d.style.marginBottom='8px';
-      d.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><div><div style="font-weight:700;font-size:14px;">${shop.name} <span class="pb pf">Free</span></div><div style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:3px;">${shop.owner||shop.barber_name||'—'}</div></div><button class="btn btn-amber btn-sm" onclick="upgradeShop('${shop.id}')">Upgrade to Pro →</button></div>`;
-      rt.appendChild(d);
+  if (freeShops.length) {
+    const h2 = document.createElement('div'); h2.className = 'sec'; h2.style.marginTop = '18px'; h2.textContent = 'Free (Upgrade Targets)'; list.appendChild(h2);
+    freeShops.forEach(s => {
+      const d = document.createElement('div'); d.className = 'card'; d.style.marginBottom = '8px';
+      d.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">' +
+        '<div><div style="font-weight:700;font-size:14px">' + esc(s.name) + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);font-family:\'Space Mono\',monospace;margin-top:2px">' + esc(s.barber_name||'—') + '</div></div>' +
+        '<button class="btn b-amber b-sm" onclick="upgradeToProAdmin(\'' + s.id + '\')">Upgrade to Pro →</button></div>';
+      list.appendChild(d);
     });
   }
 }
 
-function upgradeShop(id) {
-  const shop=S.shops.find(s=>s.id===id);
-  showModal('Upgrade to Pro',`Upgrade "${shop.name}" to Pro (R299/month)?`,'btn-amber','Upgrade', async () => {
-    if (dbMode) await supabase.from('shops').update({plan:'pro',last_paid:new Date().toISOString().split('T')[0]}).eq('id',id);
-    shop.plan='pro'; shop.lastPaid=new Date().toISOString().split('T')[0];
-    renderRevenue(); renderAdminShops(); toast(`✓ ${shop.name} upgraded`); closeModal();
+function upgradeToProAdmin(id) {
+  const shop = adminShops.find(s => s.id === id);
+  modal('Upgrade to Pro', 'Upgrade "' + shop.name + '" to Pro (R299/month)?', 'b-amber', 'Upgrade', async () => {
+    const today = new Date().toISOString().split('T')[0];
+    if (DB) await sb.from('shops').update({ plan: 'pro', last_paid: today }).eq('id', id);
+    shop.plan = 'pro'; shop.last_paid = today;
+    renderRevenue(); renderAdminShops();
+    toast('✓ ' + shop.name + ' upgraded');
+    closeModal();
   });
 }
 
-// ================================================================
+// ─────────────────────────────────────────────
 //  MODAL
-// ================================================================
-let _mcb=null;
-function showModal(title,body,cls,label,cb) {
-  document.getElementById('m-title').textContent=title;
-  document.getElementById('m-body').textContent=body;
-  const b=document.getElementById('m-btn'); b.className=`btn ${cls}`; b.textContent=label;
-  _mcb=cb; document.getElementById('modal').classList.remove('hidden');
+// ─────────────────────────────────────────────
+function modal(title, body, btnClass, btnLabel, cb) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent  = body;
+  const btn = document.getElementById('modal-ok');
+  btn.className = 'btn ' + btnClass;
+  btn.textContent = btnLabel;
+  modalCb = cb;
+  document.getElementById('modal-overlay').classList.remove('hide');
 }
-function closeModal() { document.getElementById('modal').classList.add('hidden'); _mcb=null; }
-function doModal() { if(_mcb) _mcb(); }
-
-// ================================================================
-//  RESET
-// ================================================================
-function confirmReset() {
-  showModal('Reset','Reset everything and start fresh?','btn-red','Reset', async () => {
-    if (dbMode && S.shopId) await supabase.from('queue_entries').update({status:'removed'}).eq('shop_id',S.shopId).eq('status','waiting');
-    S.queue=[]; S.served=0; S.ticketCounter=1; S.qrDone=false;
-    document.getElementById('qr-render').innerHTML=''; renderDash(); closeModal(); toast('Reset ✓');
-  });
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hide');
+  modalCb = null;
 }
+function confirmModal() { if (modalCb) modalCb(); }
 
-// ================================================================
+// ─────────────────────────────────────────────
 //  UTILS
-// ================================================================
-function ago(d) {
-  if (!d) return 'just now';
-  const s=Math.floor((new Date()-new Date(d))/1000);
-  if (s<60) return 'just now'; return Math.floor(s/60)+'m ago';
-}
-let _tt;
+// ─────────────────────────────────────────────
 function toast(msg) {
-  const e=document.querySelector('.toast'); if(e) e.remove();
-  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
-  document.body.appendChild(el); clearTimeout(_tt); _tt=setTimeout(()=>el.remove(),3000);
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
 }
 
-// ================================================================
-//  INIT
-// ================================================================
-window._appReady = false;
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
-window.addEventListener('load', () => {
-  window._appReady = true;
+function timeAgo(d) {
+  if (!d) return 'just now';
+  const s = Math.floor((Date.now() - new Date(d)) / 1000);
+  if (s < 60) return 'just now';
+  return Math.floor(s / 60) + 'm ago';
+}
 
-  // If Supabase script already finished loading before page load fired, init now.
-  // Otherwise initSupabase() will be called by the script's onload callback.
-  if (window._supabaseReady) {
-    initSupabase();
-  } else if (window._supabaseReady === false) {
-    // CDN failed
-    document.getElementById('setup-conn-warn').classList.add('show');
+// ─────────────────────────────────────────────
+//  QR CODE LIBRARY (inline — no CDN dependency)
+// ─────────────────────────────────────────────
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// ─────────────────────────────────────────────
+//  BOOT — handle QR scan params
+// ─────────────────────────────────────────────
+(function boot() {
+  const p    = new URLSearchParams(location.search);
+  const shop = p.get('shop');
+  const join = p.get('join');
+
+  if (shop && join === '1') {
+    // Came via QR code — load that shop directly
+    clientShopName = decodeURIComponent(shop);
+
+    function tryOpen() {
+      if (DB) {
+        sb.from('shops').select('*').eq('name', clientShopName).maybeSingle()
+          .then(({ data }) => {
+            if (data) {
+              openJoinScreen(data);
+            } else {
+              // Shop not in DB yet — still show join screen
+              openJoinScreen({ id: null, name: clientShopName, status: 'active', is_open: true, num_barbers: 1 });
+            }
+          });
+      } else {
+        openJoinScreen({ id: null, name: clientShopName, status: 'active', is_open: true, num_barbers: 1 });
+      }
+    }
+
+    // Wait for Supabase to init (max 1.5s) then open
+    let waited = 0;
+    const t = setInterval(() => {
+      waited += 100;
+      if (DB || waited >= 1500) { clearInterval(t); tryOpen(); }
+    }, 100);
   }
-  // If _supabaseReady is still undefined, the script is still loading —
-  // its onload/onerror will call initSupabase() when ready.
-
-  // Handle QR scan URL params
-  const p = new URLSearchParams(location.search);
-  if (p.get('join') === '1') {
-    const shop = p.get('shop');
-    if (shop) { S.shopName = decodeURIComponent(shop); S.isOpen = true; loadJoinScreen(); }
-  }
-});
+})();
 </script>
 </body>
 </html>

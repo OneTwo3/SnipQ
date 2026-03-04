@@ -18,7 +18,7 @@
   ============================================================ -->
 <script>
   const SUPABASE_URL = 'https://sllpwaeiiirzkbduyedz.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsbHB3YWVpaWlyemtiZHV5ZWR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MjEwNzIsImV4cCI6MjA4ODE5NzA3Mn0.Ro-lmBU1RdrF0j0LYtDLNc89Eagu56whcXI7hWPo5uI';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
   const ADMIN_PASSWORD = 'Fhumuandsiya1!';
 </script>
 
@@ -304,6 +304,18 @@ select.inp { cursor:pointer; }
       </div>
       <div class="card" style="margin-top:10px;"><div class="slbl">Danger Zone</div><button class="btn btn-red btn-block" onclick="clearQ()">🗑 Clear Entire Queue</button></div>
     </div>
+  </div>
+</div>
+
+<!-- SHOP SEARCH -->
+<div id="s-shop-search" class="screen">
+  <div class="topbar"><div class="tl">SnipQ</div><div class="ta"><button class="btn btn-ghost btn-sm" onclick="go('s-landing')">← Back</button></div></div>
+  <div class="sw">
+    <div class="sh">Find a Shop</div>
+    <div class="ss">Enter the barbershop name to join their live queue.</div>
+    <div class="field"><label class="lbl">Shop Name</label><input class="inp" id="inp-search-shop" placeholder="e.g. Kasi Cutz…" maxlength="40" onkeydown="if(event.key==='Enter')searchShop()"></div>
+    <button class="btn btn-gold btn-block" onclick="searchShop()">Find Queue →</button>
+    <div id="search-result" style="margin-top:16px;"></div>
   </div>
 </div>
 
@@ -663,18 +675,104 @@ async function toggleOpen() {
 //  CLIENT
 // ================================================================
 function clientEntryFlow() {
-  if (!S.shopName) { S.shopName = 'Demo Barbershop'; S.isOpen = true; }
+  if (!S.shopName) {
+    go('s-shop-search');
+    return;
+  }
   loadJoinScreen();
 }
 
-function loadJoinScreen() {
-  const sus = S.shops.find(s => s.name.toLowerCase() === S.shopName.toLowerCase() && s.status === 'suspended');
-  if (sus) { go('s-sus'); return; }
+async function searchShop() {
+  const name = document.getElementById('inp-search-shop').value.trim();
+  if (!name) { toast('Please enter a shop name'); return; }
+  const res = document.getElementById('search-result');
+  res.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px;">Searching...</div>';
+
+  if (dbMode) {
+    try {
+      const { data: shops } = await supabase.from('shops')
+        .select('*').ilike('name', '%' + name + '%').eq('status', 'active');
+      if (!shops || shops.length === 0) {
+        res.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:12px;">No shop found with that name.</div>';
+        return;
+      }
+      res.innerHTML = '';
+      shops.forEach(shop => {
+        const d = document.createElement('div');
+        d.className = 'card';
+        d.style.cssText = 'margin-bottom:10px;cursor:pointer;border-color:var(--border);transition:border-color .2s;';
+        d.onmouseover = () => d.style.borderColor = 'var(--gold)';
+        d.onmouseout = () => d.style.borderColor = 'var(--border)';
+        d.innerHTML = '<div style="font-weight:700;font-size:15px;margin-bottom:4px;">' + shop.name + '</div>' +
+          '<div style="font-size:11px;color:var(--muted);font-family:Space Mono,monospace;">' +
+          (shop.is_open ? '<span style="color:var(--green)">● OPEN</span>' : '<span style="color:var(--red)">● CLOSED</span>') +
+          ' · ' + (shop.num_barbers || 1) + ' barber(s)</div>';
+        d.onclick = () => {
+          S.shopName = shop.name;
+          S.shopId = shop.id;
+          S.isOpen = shop.is_open;
+          document.getElementById('inp-search-shop').value = '';
+          res.innerHTML = '';
+          loadJoinScreen();
+        };
+        res.appendChild(d);
+      });
+    } catch(e) {
+      res.innerHTML = '<div style="font-size:13px;color:var(--red);padding:12px;">Error searching. Try again.</div>';
+    }
+  } else {
+    // Demo mode — search local shops list
+    const found = S.shops.filter(s => s.name.toLowerCase().includes(name.toLowerCase()) && s.status === 'active');
+    if (!found.length) {
+      res.innerHTML = '<div style="font-size:13px;color:var(--red);text-align:center;padding:12px;">No shop found. (Demo mode — no real shops yet)</div>';
+      return;
+    }
+    res.innerHTML = '';
+    found.forEach(shop => {
+      const d = document.createElement('div');
+      d.className = 'card';
+      d.style.cssText = 'margin-bottom:10px;cursor:pointer;';
+      d.innerHTML = '<div style="font-weight:700;font-size:15px;">' + shop.name + '</div>';
+      d.onclick = () => {
+        S.shopName = shop.name;
+        S.isOpen = true;
+        res.innerHTML = '';
+        loadJoinScreen();
+      };
+      res.appendChild(d);
+    });
+  }
+}
+
+async function loadJoinScreen() {
+  if (dbMode && S.shopName && !S.shopId) {
+    try {
+      const { data: shop } = await supabase.from('shops').select('*').eq('name', S.shopName).single();
+      if (shop) {
+        if (shop.status === 'suspended') { go('s-sus'); return; }
+        S.shopId = shop.id;
+        S.isOpen = shop.is_open;
+        S.queue = await dbGetQueue(shop.id);
+      }
+    } catch(e) { console.warn('Shop lookup failed:', e); }
+  } else if (dbMode && S.shopId) {
+    try {
+      const { data: shop } = await supabase.from('shops').select('*').eq('id', S.shopId).single();
+      if (shop) {
+        if (shop.status === 'suspended') { go('s-sus'); return; }
+        S.isOpen = shop.is_open;
+        S.queue = await dbGetQueue(shop.id);
+      }
+    } catch(e) { console.warn('Shop lookup failed:', e); }
+  } else if (!dbMode) {
+    const sus = S.shops.find(s => s.name.toLowerCase() === S.shopName.toLowerCase() && s.status === 'suspended');
+    if (sus) { go('s-sus'); return; }
+  }
   document.getElementById('j-shopname').textContent = S.shopName;
   const n = S.queue.length;
   document.getElementById('j-count').textContent = n;
   document.getElementById('j-lbl').textContent = n===1?'person in queue':'people in queue';
-  document.getElementById('j-sub').textContent = n===0?"You'll be first!":'You\'ll be next after them';
+  document.getElementById('j-sub').textContent = n===0?"You'll be first!":'You'll be next after them';
   document.getElementById('j-closed').style.display = S.isOpen?'none':'block';
   const btn = document.getElementById('jbtn'); btn.disabled=!S.isOpen; btn.style.opacity=S.isOpen?'1':'0.4';
   go('s-join');
